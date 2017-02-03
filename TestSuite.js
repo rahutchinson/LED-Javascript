@@ -1,5 +1,7 @@
 /**
- * Created by beaumiller on 2/1/17.*/
+ * Created by beaumiller on 2/1/17.
+ * AND RYAN HUTCHINSON
+ * */
 
 function testPrimitives(){
 
