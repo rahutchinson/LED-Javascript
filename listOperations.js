@@ -17,3 +17,23 @@
  If i > j, the result is the empty list.
 
  */
+
+function len(u){
+    return u.length;
+}
+
+function listsub(s,i){
+    if(1<=i<=s.length){
+        return s[i];
+    }else{
+        return undefined;
+    }
+}
+
+function cat(s,t) {
+    return s.concat(t);
+}
+
+function slice(s,i,j) {
+
+}

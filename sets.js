@@ -1,15 +1,20 @@
 /**
  * Created by theso_000 on 1/30/2017.
  */
-function testOne() {
-    window.alert(JSON.stringify(toSet([1,1,"apple",2,2,"apple", [1,2,3]])));
-}
 // takes an array and converts it to a sorted set with no duplicates
 function toSet(arr){
     //sorts the array, then filters out repeat occurrences by position
-    return arr.sort().filter(function(item, pos, self) {
-        return self.indexOf(item) == pos;
-    });
+    if(typeof arr[0] == "number") {
+        return arr.sort(function (a, b) {
+            return (a - b);
+        }).filter(function (item, pos, self) {
+            return self.indexOf(item) == pos;
+        });
+    }else{
+            return arr.sort().filter(function (item, pos, self) {
+                return self.indexOf(item) == pos;
+            });
+        }
 }
 
 // returns true if element ∈ setA, false otherwise
