@@ -23,8 +23,14 @@ function seteq(setA, setB) {
         return false
     }else{
         for(i=0; i<setA.length; i++){
-            if(setA[i] !== setB[i]){
-                return false
+            if(setA[i] instanceof Array && setB[i] instanceof Array){
+                if(seteq(setA[i],setB[i])==false){
+                    return false
+                }
+            }else {
+                if (setA[i] !== setB[i]) {
+                    return false
+                }
             }
         }
         return true;
