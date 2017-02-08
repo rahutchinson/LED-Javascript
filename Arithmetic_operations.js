@@ -72,6 +72,7 @@ function absolute_value() {
 
 function getFirst() {
     x = document.getElementById("First_Value");
+    //consider using typeof(x)==number && x != NAN &&
     if (x != undefined){
         return Number(x.value);
     }
@@ -83,6 +84,7 @@ function getFirst() {
 
 function getSecond() {
     y = document.getElementById("Second_Value");
+    //consider using typeof(x)==number && x != NAN
     if (x != undefined){
         return Number(y.value);
     }
