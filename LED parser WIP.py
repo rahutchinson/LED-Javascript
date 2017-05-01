@@ -80,7 +80,7 @@ def Set(L):
 def Tup(L):
     return ( false, None)
 
-##Seq ::= < > | < objs>
+##Seq ::= < > | < Objs>
 ##list<tokens> -> bool*AST
 def Seq(L):
     return ( false, None)
@@ -242,7 +242,7 @@ def Cond(L):
         elif L[i]=='sub':
             (f1,t1)=S2(L[0:i])
             (f2,t2)=S2(L[i+1:])
-            if f1 and f2: return(true,['sub',t1,t2])
+            if f1 and f2: return(true,['subSet',t1,t2])
     return ( false, None)
 
 ##Quant ::=  some Obj in S2. B5 | all Obj in S2. B5
