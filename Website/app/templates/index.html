@@ -1,0 +1,26 @@
+<html>
+  <head>
+    <title>LED Evaluator</title>
+  </head>
+  <body>
+  <a href="https://docs.google.com/document/d/1xj5VUX6l9NYXQFuT-gVksSMwx5ovuQFkGymcgoZBagc/edit" target="_blank">LED Spec</a>
+    <h1>Welcome to the LED evaluator</h1>
+    <h3>Input your LED statement to be evaluated</h3>
+  <form action='/'  method="POST">
+    <input type="text" name="input">
+  <input type="submit" value="Evaluate" />
+  </form>
+
+    {% if result %}
+        <h2>Result:</h2>
+        <h1>{{ result }}</h1>
+    {% endif %}
+    {% if history %}
+        <ul class="history">
+        {% for line in history %}
+            <li>{{ line[0] }} : {{ line[1] }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+  </body>
+</html>
