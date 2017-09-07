@@ -1,6 +1,7 @@
 ##LED evaluator based on AST provided by parsing
 ##@Author: Roger Campbell
 
+
 ##Containers
 ##Objs ::=  Obj | obj,  Obj1   # one or more terms separated by commas
 
@@ -8,11 +9,11 @@
 ##['set'] -> {}
 ##['set', Objs] -> {Objs}
 def Set(L):
-    return false
+    return set (L[1])
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    return false
+    return (L[1],L[2])
 
 ##Seq ::= < > | < Objs> 
 ## ['seq'] -> < >
@@ -25,37 +26,37 @@ def Seq(L):
 ##exponentiation
 ##['exp',t1,t2] -> t1^t2
 def Exp(L):
-    return false
+    return L[1] ^ L[2]
 
 ##unary increment
 ##['inc',t1] -> +t1
 def Inc(L):
-    return false
+    return L[1]+1
 
 ##unary decrement
 ##['dec',t1] -> -t1
 def Dec(L):
-    return false
+    return L[1]-1
 
 ##multiplication
 ##['mul',t1,t2] -> t1 * t2
 def Mul(L):
-    return false
+    return L[1]*L[2]
 
 ##division
 ##['div',t1,t2] -> t1 / t2
 def Div(L):
-    return false
+    return L[1]/L[2]
 
 ##addition
 ##['add',t1,t2] -> t1 + t2
 def Add(L):
-    return false
+    return L[1]+L[2]
 
 ##subtraction
 ##['sub',t1,t2] -> t1 - t2
 def Sub(L):
-    return false
+    return L[1]-L[2]
 
 
 ##Sets
@@ -63,8 +64,7 @@ def Sub(L):
 ##set product
 ##['setProd', t1, t2] -> t1 * t2 #t1,t2 are sets
 def SetProd(L):
-    return false
-
+    return set((a,b) for a in L[1] for b in L[2])
 ##sec
 ##['sec', t1, t2] -> t1 sec t2
 def Sec(L):
@@ -73,12 +73,12 @@ def Sec(L):
 ##union
 ##['union', t1, t2] -> t1 U t2
 def Union(L):
-    return false
+    return set(L[1].add(L[2]))
 
 ##set Diff
 ##['setDiff', t1, t2] -> t1 / t2
 def SetDiff(L):
-    return false
+    return L[1]-L[2]
 
 
 ##Conditionals
@@ -86,61 +86,71 @@ def SetDiff(L):
 ##Less than
 ##['<', t1, t2] -> t1 < t2
 def LT(L):
-    return false
+    return L[1] < L[2]
 
 ##Greater than
 ##['>', t1, t2] -> t1 > t2
 def GT(L):
-    return false
+    return L[1] > L[2]
 
 ##Less than or equal to
 ##['<=', t1, t2] -> t1 <= t2
 def LTE(L):
-    return false
+    return L[1] <= L[2]
 
 ##Greater than or equal to
 ##['>=', t1, t2] -> t1 >= t2
 def GTE(L):
-    return false
+    return L[1] >= L[2]
 
 ##Equal to
 ##['=', t1, t2] -> t1 = t2
 def EQ(L):
-    return false
+    return L[1] == L[2]
 
 ##Contained in
 ##['in', t1, t2] -> t1 in t2 #t1 is an Obj t2 is a container
 def In(L):
-    return false
+    return L[1] in L[2]
 
 ##subset
 ##['subSet', t1, t2] -> t1 sub t2 #t1 and t2 are sets
 def SubSet(L):
-    return false
+    return L[1].issubset(L[2])
 
 ##Boolean Connectives
 
 ##not
 ##['not', t1] -> ~t1
 def Not(L):
-    return false
+    return not L[1]
 
 ##and
 ##['and', t1, t2] -> t1 & t2
 def And(L):
-    return false
+    return L[1] and L[2]
 
 ##or
 ##['or', t1, t2] -> t1 V t2
 def Or(L):
-    return false
-
+    return L[1] or L[2]
+        
 ##implication
 ##['imp', t1, t2] -> t1 => t2
 def Imp(L):
-    return false
-
+    return not L[1] or L[2]
+        
 ##if and only if
 ##['iff', t1, t2] -> t1 <=> t2
 def Iff(L):
-    return false
+    return (L[1] and L[2]) or (not L[1] and not L[2])
+
+def evaluate(L):
+    f = globals()["%s" % L[0]]
+    print(f)
+    if isinstance(L[1],list):
+        L[1]=evaluate(L[1])
+    if isinstance(L[2],list):
+        L[2]=evaluate(L[2])
+    return f(L)
+print(evaluate(['Or',['And',False,False],['And',True,True]]))
