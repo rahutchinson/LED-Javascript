@@ -58,7 +58,7 @@ A *state* is a string . States *describe* strings as given below:
 # describes the string A+c.
 
 def isSpecial(c):
-    return c in "<>=*+-^|~.{}()[]\/"
+    return c in "<>=*+-^|,~.{}()[]\/"
 
 
 def newState(A,c):
@@ -66,7 +66,7 @@ def newState(A,c):
         if c.isalpha(): return 'id'
         elif c.isdigit(): return 'num'
         elif c == "'": return 'str'
-        elif c == "(": return 'left_paren'
+        # elif c == "(": return 'left_paren'
         elif c == ".": return 'period'
         elif isSpecial(c):
             if c == '<': return '<_extendable'
@@ -107,5 +107,5 @@ def newState(A,c):
     
     return 'err'
 
-print(lemmatize('3.33(33..'))
+print(lemmatize("[2,'test',(1,6)]"))
 # END PROGRAM
