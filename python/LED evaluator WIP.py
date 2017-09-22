@@ -9,11 +9,15 @@
 ##['set'] -> {}
 ##['set', Objs] -> {Objs}
 def Set(L):
-    return set (L[1])
+    return set(L[1])
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    return (L[1],L[2])
+    tup=()
+    for a in L[1:]:
+        tup += a
+    return tup
+
 
 ##Seq ::= < > | < Objs> 
 ## ['seq'] -> < >
@@ -153,4 +157,5 @@ def evaluate(L):
     if isinstance(L[2],list):
         L[2]=evaluate(L[2])
     return f(L)
-print(evaluate(['Or',['And',False,False],['And',True,True]]))
+print(evaluate())
+
