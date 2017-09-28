@@ -37,39 +37,6 @@ def ContPair(open,close):
     else:
         return False
 
-def ContHelper(L):
-    stack=[]
-    contQueue=[]
-    tree=[]
-    for i in range(0,len(L)):
-        if L[i] in ['{','(','<']:
-            stack.append((L[i],i))
-        if L[i] in ['}',')','>']:
-            (openChar,index)= stack.pop()
-            if ContPair(openChar,L[i]):
-               contQueue.append((index,i+1))
-            else:
-                return False
-
-    if len(contQueue) == 0:
-        return Objs(L)
-
-    if len(contQueue) == 1:
-        return Cont(L)
-
-    if len(contQueue) > 1:
-        (start,stop)=contQueue.pop(0)
-        tree = Cont(L[start:stop])[1]
-        for i in range(1,len(contQueue)+1):
-            temp = L[contQueue[i][0]:start].append(set(tree))
-            temp.append(L[stop:contQueue[i][1]])
-            tree= Cont(temp)
-            start,stop=i[0],i[1]
-
-    if None in tree:
-        return (False, None)
-    else:
-        return (True, tree)
 
 
 ##Cont ::= Set | Tup | Seq
@@ -85,18 +52,35 @@ def Cont(L):
     return (False, None)
 
 
-##Set ::= { } | { Objs }
-##list<tokens> -> bool*AST
-def Set(L):
-    if L[0] == '{':
-        if L[1] == '}':
-            return (True, {})
-        else:
-            (f1, t1) = Objs(L[ 1:len(L) - 1])
-            if f1 and L[len(L) - 1] == '}':
-                return (True, ['Set', t1])
 
-    return (False, None)
+def Set(L):
+    if L[0]=='{' and L[-1]=='}':
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        return (True, ['Set', cons(nextEle,remains)])
+    else:
+        return (False, None)
+
+def cons(ele,L):
+    ele=Obj(ele)[1]
+    if L==None:
+        return ['cons', ele, 'nil']
+    else:
+        (nextEle, remains) = nextElement(L)
+        return ['cons', ele, cons(nextEle,remains)]
+
+def nextElement(L):
+    stack=[]
+    for i in range(0,len(L)):
+        if L[i]=='{':
+            stack.append(L[i])
+        elif L[i]=='}':
+            stack.pop()
+
+        if L[i]==',' and len(stack)==0:
+            return (L[:i],L[i+1:])
+
+    return L,None
 
 
 ##Tup ::= ( Obj , Objs)
@@ -137,6 +121,10 @@ def Obj(L):
     (flag, tree) = B5(L)
     if flag:
         return (True, tree)
+    if L[0] == '{':
+        (flag, tree) = Set(L)
+        if flag:
+            return (True, tree)
     #Cont
     (flag, tree) = Cont(L)
     if flag:
@@ -460,4 +448,5 @@ def B5(L):
 
 #print(Set(['{',2,',',3,'}']))
 
-print(Objs([5,'+',7]))
+print(Set(['{',1,'+',3,',','{',2,',',3,'}',',',4,'}']))
+#print(Obj(['{',1,',',2,'}']))
