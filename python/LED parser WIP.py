@@ -31,13 +31,6 @@
 ##B4 ::= B3 | B4 => B3
 ##B5 ::= B4 | B5 <=> B4
 
-def parse(L):
-    (flag,tree) = Objs(L)
-    if flag:
-        return tree
-    else:
-        return None
-
 def ContPair(open,close):
     if open == '{' and close == '}' or open == '(' and close == ')' or open == '<' and close == '>':
         return True
