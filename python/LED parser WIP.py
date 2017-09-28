@@ -2,12 +2,14 @@
 # Author: Roger W. Campbell
 
 ##Based upon the following grammar:
-##Obj ::= T4 | B5 | Cont | Str
+##Obj ::= T4 | B5 | Cont | Str | Func  /* Added by Beau */
 ##Objs ::=  Obj | obj,  Obj1   # one or more terms separated by commas
 ##Cont ::= Set | Tup | Seq
 ##Set ::= { } | { Objs }
 ##Tup ::= ( Obj , Objs)
-##Seq ::= < > | < objs> 
+##Seq ::= < > | < objs>
+##
+##Func ::= lambda Objs :
 ##
 ##
 ##T0 ::= intNum | (  T4   )

@@ -8,7 +8,7 @@ List of strings -> List of (value, type)
 Beau Miller, Texas Tech. September 2017
 '''
 
-from Lemmatizer import lemmatize
+# from Lexer import lex
 import re
 
 
@@ -48,8 +48,8 @@ def tokenize(lemma_list):
     return token_list
 
 
-print(lemmatize("True"))
-print(lemmatize("[5,True]"))
-print(tokenize(lemmatize("[5,True]")))
+# print(lex("True"))
+# print(lex("[5,True]"))
+# print(tokenize(lex("alpha := lambda x: x + 5")))
 
 

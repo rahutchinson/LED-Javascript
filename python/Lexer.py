@@ -8,7 +8,7 @@ March 2017
 def whiteChar(c): return (c in " \r\n\t\v")
 
 # tokenize(s) = Tokenize(s), whenever Tokenize(s) is defined
-def lemmatize(s):
+def lex(s):
   i = 0 
   tokens = [ ]
   # invariants:0 <= i <= len(s),  tokens = Tokenize(s[:i]),
@@ -58,7 +58,7 @@ A *state* is a string . States *describe* strings as given below:
 # describes the string A+c.
 
 def isSpecial(c):
-    return c in "<>=*+-^|,~.{}()[]\/"
+    return c in "<>=*+-^|,~.{}()[]\/:"
 
 
 def newState(A,c):
@@ -72,6 +72,7 @@ def newState(A,c):
             if c == '<': return '<_extendable'
             elif c == '>': return '>_extendable'
             elif c == '=': return '=_extendable'
+            elif c == ':': return ':_extendable'
             else: return 'non-extendable'
     elif A=='id':
         if (c.isalpha() or c.isdigit()): return 'id'
@@ -103,9 +104,11 @@ def newState(A,c):
     elif A == '>_extendable':
         if c == '=': return 'non-extendable'
     elif A == '<=_extendable':
-        if c == '>': return 'non-extendable'       
+        if c == '>': return 'non-extendable'
+    elif A == ':_extendable':
+        if c == '=': return 'non-extendable'
     
     return 'err'
 
-print(lemmatize("[2,'test',(1,6)]"))
+# print(lex("alpha := lambda x: x + 5"))
 # END PROGRAM
