@@ -62,6 +62,18 @@ def Cont(L):
 
 
 def Set(L):
+    #check for multiple separate sets as in the case of S2
+    stack = []
+    for i in range(0, len(L)-1):
+        if L[i] == '{':
+            stack.append(L[i])
+        elif L[i] == '}':
+            stack.pop()
+
+        if len(stack)==0:
+            return (False,None)
+    
+    #proceeding once only one set is present
     if L[0]=='{' and L[-1]=='}':
         if len(L)==2:
             return (True,['Set',cons(None,None)])
@@ -150,10 +162,9 @@ def Obj(L):
     (flag, tree) = B5(L)
     if flag:
         return (True, tree)
-    # if L[0] == '{':
-    #     (flag, tree) = Set(L)
-    #     if flag:
-    #         return (True, tree)
+    #S2
+    (flag, tree) = S2(L)
+    if flag: return (True, tree)
     #Cont
     (flag, tree) = Cont(L)
     if flag:
@@ -215,8 +226,8 @@ def T0(L):
     if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, L[0])
     #(T4) test this may need to end range at len(L)-3
     if L[0] == '(':
-        (f1, t1) = T4(L[i + 1:len(L) - 1])
-        if f1 and L[len(L) - 1] == ')':
+        (f1, t1) = T4(L[1:-1])
+        if f1 and L[-1] == ')':
             return (True, t1)
     #error
     return (False, None)
@@ -225,15 +236,17 @@ def T0(L):
 ##T1 ::= T0 | T0 ^ T1
 ##list<tokens> -> bool*AST
 def T1(L):
+    # T0
+    (flag, tree) = T0(L)
+    if flag: return (True, tree)
+
     #T0 ^ T1
     for i in range(1, len(L) - 1):
         if L[i] == '^':
             (f1, t1) = T0(L[0:i])
             (f2, t2) = T1(L[i + 1:])
             if f1 and f2: return (True, ['Exp', t1, t2])
-    #T0
-    (flag, tree) = T0(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -241,20 +254,21 @@ def T1(L):
 ##T2 ::= T1 | + T2 | - T2 | f T2
 ##list<tokens> -> bool*AST
 def T2(L):
-    #+ T2 | - T2 | f T2
-    for i in range(0, len(L) - 1):
-        #+ T2
-        if L[i] == '+':
-            (f1, t1) = T2(L[i + 1:])
-            if f1: return (True, ['Inc', t1])
-        #- T2
-        elif L[i] == '-':
-            (f1, t1) = T2(L[i + 1:])
-            if f1: return (True, ['Dec', t1])
-        #f T2 undone return (True,['f',t1])
     # T1
     (flag, tree) = T1(L)
     if flag: return (True, tree)
+
+    #+ T2 | - T2 | f T2
+        #+ T2
+    if L[0] == '+':
+        (f1, t1) = T2(L[1:])
+        if f1: return (True, ['Inc', t1])
+        #- T2
+    elif L[0] == '-':
+        (f1, t1) = T2(L[1:])
+        if f1: return (True, ['Dec', t1])
+        #f T2 undone return (True,['f',t1])
+
 
     return (False, None)
 
@@ -262,6 +276,10 @@ def T2(L):
 ##T3 ::= T2 | T3 * T2 | T3 / T2
 ##list<tokens> -> bool*AST
 def T3(L):
+    # T2
+    (flag, tree) = T2(L)
+    if flag: return (True, tree)
+
     #T3 * T2 | T3 / T2
     for i in range(1, len(L) - 1):
         #T3 * T2
@@ -274,9 +292,7 @@ def T3(L):
             (f1, t1) = T3(L[0:i])
             (f2, t2) = T2(L[i + 1:])
             if f1 and f2: return (True, ['Div', t1, t2])
-    # T2
-    (flag, tree) = T2(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -284,6 +300,10 @@ def T3(L):
 ##T4 ::= T3 | T4 + T3 | T4 - T3
 ##list<tokens> -> bool*AST
 def T4(L):
+    # T3
+    (flag, tree) = T3(L)
+    if flag: return (True, tree)
+
     #T4 + T3 | T4 - T3
     for i in range(1, len(L) - 1):
         #T4 + T3
@@ -296,9 +316,7 @@ def T4(L):
             (f1, t1) = T4(L[0:i])
             (f2, t2) = T3(L[i + 1:])
             if f1 and f2: return (True, ['Sub', t1, t2])
-    #T3
-    (flag, tree) = T3(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -307,13 +325,13 @@ def T4(L):
 ##list<tokens> -> bool*AST
 def S0(L):
     #Set
-    if isinstance(L[0], set) and len(L) == 1: return (True, L[0])
+    (flag, tree) = Set(L)
+    if flag: return (True, tree)
     #(S2)
-    for i in range(0, len(L) - 1):
-        if L[i] == '(':
-            (f1, t1) = S2(L[i + 1:len(L) - 1])
-            if f1 and L[len(L) - 1] == ')':
-                return (True, t1)
+    if L[0] == '(':
+        (f1, t1) = S2(L[1:-1])
+        if f1 and L[-1] == ')':
+            return (True, t1)
     #error
     return (False, None)
 
@@ -321,6 +339,9 @@ def S0(L):
 ##S1 ::= S0 | S1 * S0 | S1 sec S0
 ##list<tokens> -> bool*AST
 def S1(L):
+    # S0
+    (flag, tree) = S0(L)
+    if flag: return (True, tree)
     #S1 * S0 | S1 sec S0
     for i in range(1, len(L) - 1):
         #S1 * S0
@@ -333,9 +354,6 @@ def S1(L):
             (f1, t1) = S1(L[0:i])
             (f2, t2) = S0(L[i + 1:])
             if f1 and f2: return (True, ['Sec', t1, t2])
-    #S0
-    (flag, tree) = S0(L)
-    if flag: return (True, tree)
     #error
     return (False, None)
 
@@ -343,6 +361,9 @@ def S1(L):
 ##S2 ::= S1 | S2 U S1 | S2 \ S1
 ##list<tokens> -> bool*AST
 def S2(L):
+    # S1
+    (flag, tree) = S1(L)
+    if flag: return (True, tree)
     #S2 U S1 | S2 \ S1
     for i in range(1, len(L) - 1):
         #S2 U S1
@@ -355,9 +376,7 @@ def S2(L):
             (f1, t1) = S2(L[0:i])
             (f2, t2) = S1(L[i + 1:])
             if f1 and f2: return (True, ['setDiff', t1, t2])
-    #S1
-    (flag, tree) = S1(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -401,8 +420,8 @@ def B0(L):
     if isinstance(L[0], bool) and len(L)==1 : return (True, L[0])
     #( B5 )
     if L[0] == '(':
-        (f1, t1) = B5(L[1:len(L) - 1])
-        if f1 and L[len(L) - 1] == ')': return (True, t1)
+        (f1, t1) = B5(L[1:-1])
+        if f1 and L[-1] == ')': return (True, t1)
     #Cond
     (flag, tree) = Cond(L)
     if flag: return (True, tree)
@@ -413,14 +432,14 @@ def B0(L):
 ##B1 ::= B0 | ~B1
 ##list<tokens> -> bool*AST
 def B1(L):
-    #~B1
-    for i in range(0, len(L) - 1):
-        if L[i] == '~':
-            (f1, t1) = B1(L[i + 1:])
-            if f1: return (True, ['Not', t1])
-    #B0
+    # B0
     (flag, tree) = B0(L)
     if flag: return (True, tree)
+    #~B1
+    if L[0] == '~':
+        (f1, t1) = B1(L[1:])
+        if f1: return (True, ['Not', t1])
+
     #error
     return (False, None)
 
@@ -428,15 +447,16 @@ def B1(L):
 ##B2 ::= B1 | B2 & B1
 ##list<tokens> -> bool*AST
 def B2(L):
+    #B1
+    (flag, tree) = B1(L)
+    if flag: return (True, tree)
     #B2 & B1
     for i in range(1, len(L) - 1):
         if L[i] == '&':
             (f1, t1) = B2(L[0:i])
             (f2, t2) = B1(L[i + 1:])
             if f1 and f2: return (True, ['And', t1, t2])
-    #B1
-    (flag, tree) = B1(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -444,15 +464,16 @@ def B2(L):
 ##B3 ::= B2 | B3 V B2
 ##list<tokens> -> bool*AST
 def B3(L):
+    # B2
+    (flag, tree) = B2(L)
+    if flag: return (True, tree)
     #B3 V B2
     for i in range(1, len(L) - 1):
         if L[i] == 'V':
             (f1, t1) = B3(L[0:i])
             (f2, t2) = B2(L[i + 1:])
             if f1 and f2: return (True, ['Or', t1, t2])
-    #B2
-    (flag, tree) = B2(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -460,15 +481,16 @@ def B3(L):
 ##B4 ::= B3 | B4 => B3
 ##list<tokens> -> bool*AST
 def B4(L):
+    # B3
+    (flag, tree) = B3(L)
+    if flag: return (True, tree)
     #B4 => B3
     for i in range(1, len(L) - 1):
         if L[i] == '=>':
             (f1, t1) = B4(L[0:i])
             (f2, t2) = B3(L[i + 1:])
             if f1 and f2: return (True, ['Imp', t1, t2])
-    #B3
-    (flag, tree) = B3(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -476,18 +498,20 @@ def B4(L):
 ##B5 ::= B4 | B5 <=> B4
 ##list<tokens> -> bool*AST
 def B5(L):
+    # B4
+    (flag, tree) = B4(L)
+    if flag: return (True, tree)
     #B5 <=> B4
     for i in range(1, len(L) - 1):
         if L[i] == '<=>':
             (f1, t1) = B5(L[0:i])
             (f2, t2) = B4(L[i + 1:])
             if f1 and f2: return (True, ['Iff', t1, t2])
-    #B4
-    (flag, tree) = B4(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
-#print(Objs(['{',1,'}']))
-print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
-#print(Obj(['{',1,',',2,'}']))
+#print(parse(['(',5,')']))
+#print(parse(['(',1,'+',2,')']))
+#print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
+print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
