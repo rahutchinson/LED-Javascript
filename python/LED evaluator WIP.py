@@ -22,7 +22,7 @@ def cons(L):
 ##['set', Objs] -> {Objs}
 ##['Set',cons]
 def Set(L):
-    return set(L[1])
+    return frozenset(L[1])
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
@@ -85,7 +85,7 @@ def Sec(L):
 ##union
 ##['union', t1, t2] -> t1 U t2
 def Union(L):
-    return set(L[1].add(L[2]))
+    return frozenset(L[1].union(L[2]))
 
 ##set Diff
 ##['setDiff', t1, t2] -> t1 / t2
@@ -160,10 +160,11 @@ def Iff(L):
 def evaluate(L):
     f = globals()["%s" % L[0]]
     print(f)
-    if isinstance(L[1],list):
+    if len(L)>= 2 and isinstance(L[1],list):
         L[1]=evaluate(L[1])
-    if isinstance(L[2],list):
+    if len(L)>= 3 and isinstance(L[2],list):
         L[2]=evaluate(L[2])
     return f(L)
-print(evaluate())
+#print(evaluate(['Set', ['cons', 1, ['cons', ['Set', ['cons', 2, ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
+#print(evaluate(['Union', ['Set', ['cons', 1, ['cons', 2, ['cons', ['Add', 3, 4], 'nil']]]], ['Set', ['cons', ['Imp', True, False], ['cons', 7, 'nil']]]]))
 
