@@ -33,45 +33,20 @@
 ##B4 ::= B3 | B4 => B3
 ##B5 ::= B4 | B5 <=> B4
 
+def parse(L):
+    (flag, tree)= Objs(L)
+    if flag:
+        return tree
+    else:
+        return None
+
+
 def ContPair(open,close):
     if open == '{' and close == '}' or open == '(' and close == ')' or open == '<' and close == '>':
         return True
     else:
         return False
 
-def ContHelper(L):
-    stack=[]
-    contQueue=[]
-    tree=[]
-    for i in range(0,len(L)):
-        if L[i] in ['{','(','<']:
-            stack.append((L[i],i))
-        if L[i] in ['}',')','>']:
-            (openChar,index)= stack.pop()
-            if ContPair(openChar,L[i]):
-               contQueue.append((index,i+1))
-            else:
-                return False
-
-    if len(contQueue) == 0:
-        return Objs(L)
-
-    if len(contQueue) == 1:
-        return Cont(L)
-
-    if len(contQueue) > 1:
-        (start,stop)=contQueue.pop(0)
-        tree = Cont(L[start:stop])[1]
-        for i in range(1,len(contQueue)+1):
-            temp = L[contQueue[i][0]:start].append(set(tree))
-            temp.append(L[stop:contQueue[i][1]])
-            tree= Cont(temp)
-            start,stop=i[0],i[1]
-
-    if None in tree:
-        return (False, None)
-    else:
-        return (True, tree)
 
 
 ##Cont ::= Set | Tup | Seq
@@ -87,46 +62,96 @@ def Cont(L):
     return (False, None)
 
 
-##Set ::= { } | { Objs }
-##list<tokens> -> bool*AST
-def Set(L):
-    if L[0] == '{':
-        if L[1] == '}':
-            return (True, {})
-        else:
-            (f1, t1) = Objs(L[ 1:len(L) - 1])
-            if f1 and L[len(L) - 1] == '}':
-                return (True, ['Set', t1])
 
-    return (False, None)
+def Set(L):
+    #check for multiple separate sets as in the case of S2
+    stack = []
+    for i in range(0, len(L)-1):
+        if L[i] == '{':
+            stack.append(L[i])
+        elif L[i] == '}':
+            stack.pop()
+
+        if len(stack)==0:
+            return (False,None)
+    
+    #proceeding once only one set is present
+    if L[0]=='{' and L[-1]=='}':
+        if len(L)==2:
+            return (True,['Set',cons(None,None)])
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        return (True, ['Set', cons(nextEle,remains)])
+    else:
+        return (False, None)
+
+def cons(ele,L):
+    if ele==None and L == None:
+        return ['cons','nil']
+    ele=Obj(ele)[1]
+    if L==None:
+        return ['cons', ele, 'nil']
+    else:
+        (nextEle, remains) = nextElement(L)
+        return ['cons', ele, cons(nextEle,remains)]
+
+def nextElement(L):
+    stack=[]
+    for i in range(0,len(L)):
+        if L[i] in ['{','<','(']:
+            stack.append(L[i])
+        elif L[i] in ['}','>',')']:
+            if not ContPair(stack.pop(),L[i]):
+                return None,None
+        if L[i]==',' and len(stack)==0:
+            return (L[:i],L[i+1:])
+    return L,None
 
 
 ##Tup ::= ( Obj , Objs)
 ##list<tokens> -> bool*AST
 def Tup(L):
-    if L[0] == '(':
-        (f1, t1) = Obj(L[1])
-        (f2,t2) = Objs(L[2:len(L)-1])
-        if f1 and f2 and L[len(L) - 1] == ')':
-            return (True, ['Tup', t1, t2])
-
-    return (False, None)
+    if L[0]=='(' and L[-1]==')':
+        if len(L)==2:
+            return (False,None)
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        if remains == None:
+            return (False,None)
+        return (True, ['Tup', cons(nextEle,remains)])
+    else:
+        return (False, None)
+    # if L[0] == '(':
+    #     (f1, t1) = Obj(L[1])
+    #     (f2,t2) = Objs(L[2:len(L)-1])
+    #     if f1 and f2 and L[len(L) - 1] == ')':
+    #         return (True, ['Tup', t1, t2])
+    #
+    # return (False, None)
 
 
 ##Seq ::= < > | < Objs>
 ##list<tokens> -> bool*AST
 def Seq(L):
-    #< >
-    if L[0] == '<':
-        if L[1] == '>':
-            return (True, ['<>'])
-        #< Objs >
-        else:
-            (f1, t1) = Objs(L[1:len(L) - 1])
-            if f1 and L[len(L) - 1] == '>':
-                return (True, ['Seq', t1])
-    #error
-    return (False, None)
+    if L[0]=='<' and L[-1]=='>':
+        if len(L)==2:
+            return (True,['Seq',cons(None,None)])
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        return (True, ['Seq', cons(nextEle,remains)])
+    else:
+        return (False, None)
+    # #< >
+    # if L[0] == '<':
+    #     if L[1] == '>':
+    #         return (True, ['<>'])
+    #     #< Objs >
+    #     else:
+    #         (f1, t1) = Objs(L[1:len(L) - 1])
+    #         if f1 and L[len(L) - 1] == '>':
+    #             return (True, ['Seq', t1])
+    # #error
+    # return (False, None)
 
 
 ##Obj ::= T4 | B5 | Cont | Str
@@ -139,6 +164,9 @@ def Obj(L):
     (flag, tree) = B5(L)
     if flag:
         return (True, tree)
+    #S2
+    (flag, tree) = S2(L)
+    if flag: return (True, tree)
     #Cont
     (flag, tree) = Cont(L)
     if flag:
@@ -153,28 +181,41 @@ def Obj(L):
 ##Objs ::=  Obj | obj,  Obj1   # one or more terms separated by commas
 ##list<tokens> -> bool*AST
 def Objs(L):
-    trees = []
-    comaIndex = []
     if len(L)==1:
         return Obj(L)
     else:
-        for i in range(0,len(L)):
-            if L[i] == ',':
-                comaIndex.append(i)
-        for n in range(0, len(comaIndex)):
-            if n == 0:
-                trees.append(Obj(L[:comaIndex[n]])[1])
-                trees.append(',')
-            if n == len(comaIndex) - 1:
-                trees.append(Obj(L[comaIndex[n] + 1:])[1])
-            else:
-                trees.append(Obj(L[comaIndex[n] + 1:comaIndex[n + 1]])[1])
-    if(len(comaIndex)==0):
-        trees.append(Obj(L)[1])
-    if None in trees:
-        return (False, None)
-    else:
-        return(True,trees)
+        (nextEle, remains) = nextElement(L)
+        if remains == None:
+            return Obj(nextEle)
+        else:
+            (flag, tree) = Obj(nextEle)
+            if flag:
+                return tree.append(Objs(remains))
+
+    return (False,None)
+
+    # trees = []
+    # comaIndex = []
+    # if len(L)==1:
+    #     return Obj(L)
+    # else:
+    #     for i in range(0,len(L)):
+    #         if L[i] == ',':
+    #             comaIndex.append(i)
+    #     for n in range(0, len(comaIndex)):
+    #         if n == 0:
+    #             trees.append(Obj(L[:comaIndex[n]])[1])
+    #             trees.append(',')
+    #         if n == len(comaIndex) - 1:
+    #             trees.append(Obj(L[comaIndex[n] + 1:])[1])
+    #         else:
+    #             trees.append(Obj(L[comaIndex[n] + 1:comaIndex[n + 1]])[1])
+    # if(len(comaIndex)==0):
+    #     trees.append(Obj(L)[1])
+    # if None in trees:
+    #     return (False, None)
+    # else:
+    #     return(True,trees)
 
 
 
@@ -187,8 +228,8 @@ def T0(L):
     if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, L[0])
     #(T4) test this may need to end range at len(L)-3
     if L[0] == '(':
-        (f1, t1) = T4(L[i + 1:len(L) - 1])
-        if f1 and L[len(L) - 1] == ')':
+        (f1, t1) = T4(L[1:-1])
+        if f1 and L[-1] == ')':
             return (True, t1)
     #error
     return (False, None)
@@ -197,15 +238,17 @@ def T0(L):
 ##T1 ::= T0 | T0 ^ T1
 ##list<tokens> -> bool*AST
 def T1(L):
+    # T0
+    (flag, tree) = T0(L)
+    if flag: return (True, tree)
+
     #T0 ^ T1
     for i in range(1, len(L) - 1):
         if L[i] == '^':
             (f1, t1) = T0(L[0:i])
             (f2, t2) = T1(L[i + 1:])
             if f1 and f2: return (True, ['Exp', t1, t2])
-    #T0
-    (flag, tree) = T0(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -213,20 +256,21 @@ def T1(L):
 ##T2 ::= T1 | + T2 | - T2 | f T2
 ##list<tokens> -> bool*AST
 def T2(L):
-    #+ T2 | - T2 | f T2
-    for i in range(0, len(L) - 1):
-        #+ T2
-        if L[i] == '+':
-            (f1, t1) = T2(L[i + 1:])
-            if f1: return (True, ['Inc', t1])
-        #- T2
-        elif L[i] == '-':
-            (f1, t1) = T2(L[i + 1:])
-            if f1: return (True, ['Dec', t1])
-        #f T2 undone return (True,['f',t1])
     # T1
     (flag, tree) = T1(L)
     if flag: return (True, tree)
+
+    #+ T2 | - T2 | f T2
+        #+ T2
+    if L[0] == '+':
+        (f1, t1) = T2(L[1:])
+        if f1: return (True, ['Inc', t1])
+        #- T2
+    elif L[0] == '-':
+        (f1, t1) = T2(L[1:])
+        if f1: return (True, ['Dec', t1])
+        #f T2 undone return (True,['f',t1])
+
 
     return (False, None)
 
@@ -234,6 +278,10 @@ def T2(L):
 ##T3 ::= T2 | T3 * T2 | T3 / T2
 ##list<tokens> -> bool*AST
 def T3(L):
+    # T2
+    (flag, tree) = T2(L)
+    if flag: return (True, tree)
+
     #T3 * T2 | T3 / T2
     for i in range(1, len(L) - 1):
         #T3 * T2
@@ -246,9 +294,7 @@ def T3(L):
             (f1, t1) = T3(L[0:i])
             (f2, t2) = T2(L[i + 1:])
             if f1 and f2: return (True, ['Div', t1, t2])
-    # T2
-    (flag, tree) = T2(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -256,6 +302,10 @@ def T3(L):
 ##T4 ::= T3 | T4 + T3 | T4 - T3
 ##list<tokens> -> bool*AST
 def T4(L):
+    # T3
+    (flag, tree) = T3(L)
+    if flag: return (True, tree)
+
     #T4 + T3 | T4 - T3
     for i in range(1, len(L) - 1):
         #T4 + T3
@@ -268,9 +318,7 @@ def T4(L):
             (f1, t1) = T4(L[0:i])
             (f2, t2) = T3(L[i + 1:])
             if f1 and f2: return (True, ['Sub', t1, t2])
-    #T3
-    (flag, tree) = T3(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -279,13 +327,13 @@ def T4(L):
 ##list<tokens> -> bool*AST
 def S0(L):
     #Set
-    if isinstance(L[0], set) and len(L) == 1: return (True, L[0])
+    (flag, tree) = Set(L)
+    if flag: return (True, tree)
     #(S2)
-    for i in range(0, len(L) - 1):
-        if L[i] == '(':
-            (f1, t1) = S2(L[i + 1:len(L) - 1])
-            if f1 and L[len(L) - 1] == ')':
-                return (True, t1)
+    if L[0] == '(':
+        (f1, t1) = S2(L[1:-1])
+        if f1 and L[-1] == ')':
+            return (True, t1)
     #error
     return (False, None)
 
@@ -293,6 +341,9 @@ def S0(L):
 ##S1 ::= S0 | S1 * S0 | S1 sec S0
 ##list<tokens> -> bool*AST
 def S1(L):
+    # S0
+    (flag, tree) = S0(L)
+    if flag: return (True, tree)
     #S1 * S0 | S1 sec S0
     for i in range(1, len(L) - 1):
         #S1 * S0
@@ -305,9 +356,6 @@ def S1(L):
             (f1, t1) = S1(L[0:i])
             (f2, t2) = S0(L[i + 1:])
             if f1 and f2: return (True, ['Sec', t1, t2])
-    #S0
-    (flag, tree) = S0(L)
-    if flag: return (True, tree)
     #error
     return (False, None)
 
@@ -315,6 +363,9 @@ def S1(L):
 ##S2 ::= S1 | S2 U S1 | S2 \ S1
 ##list<tokens> -> bool*AST
 def S2(L):
+    # S1
+    (flag, tree) = S1(L)
+    if flag: return (True, tree)
     #S2 U S1 | S2 \ S1
     for i in range(1, len(L) - 1):
         #S2 U S1
@@ -327,9 +378,7 @@ def S2(L):
             (f1, t1) = S2(L[0:i])
             (f2, t2) = S1(L[i + 1:])
             if f1 and f2: return (True, ['setDiff', t1, t2])
-    #S1
-    (flag, tree) = S1(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -373,8 +422,8 @@ def B0(L):
     if isinstance(L[0], bool) and len(L)==1 : return (True, L[0])
     #( B5 )
     if L[0] == '(':
-        (f1, t1) = B5(L[1:len(L) - 1])
-        if f1 and L[len(L) - 1] == ')': return (True, t1)
+        (f1, t1) = B5(L[1:-1])
+        if f1 and L[-1] == ')': return (True, t1)
     #Cond
     (flag, tree) = Cond(L)
     if flag: return (True, tree)
@@ -385,14 +434,14 @@ def B0(L):
 ##B1 ::= B0 | ~B1
 ##list<tokens> -> bool*AST
 def B1(L):
-    #~B1
-    for i in range(0, len(L) - 1):
-        if L[i] == '~':
-            (f1, t1) = B1(L[i + 1:])
-            if f1: return (True, ['Not', t1])
-    #B0
+    # B0
     (flag, tree) = B0(L)
     if flag: return (True, tree)
+    #~B1
+    if L[0] == '~':
+        (f1, t1) = B1(L[1:])
+        if f1: return (True, ['Not', t1])
+
     #error
     return (False, None)
 
@@ -400,15 +449,16 @@ def B1(L):
 ##B2 ::= B1 | B2 & B1
 ##list<tokens> -> bool*AST
 def B2(L):
+    #B1
+    (flag, tree) = B1(L)
+    if flag: return (True, tree)
     #B2 & B1
     for i in range(1, len(L) - 1):
         if L[i] == '&':
             (f1, t1) = B2(L[0:i])
             (f2, t2) = B1(L[i + 1:])
             if f1 and f2: return (True, ['And', t1, t2])
-    #B1
-    (flag, tree) = B1(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -416,15 +466,16 @@ def B2(L):
 ##B3 ::= B2 | B3 V B2
 ##list<tokens> -> bool*AST
 def B3(L):
+    # B2
+    (flag, tree) = B2(L)
+    if flag: return (True, tree)
     #B3 V B2
     for i in range(1, len(L) - 1):
         if L[i] == 'V':
             (f1, t1) = B3(L[0:i])
             (f2, t2) = B2(L[i + 1:])
             if f1 and f2: return (True, ['Or', t1, t2])
-    #B2
-    (flag, tree) = B2(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -432,15 +483,16 @@ def B3(L):
 ##B4 ::= B3 | B4 => B3
 ##list<tokens> -> bool*AST
 def B4(L):
+    # B3
+    (flag, tree) = B3(L)
+    if flag: return (True, tree)
     #B4 => B3
     for i in range(1, len(L) - 1):
         if L[i] == '=>':
             (f1, t1) = B4(L[0:i])
             (f2, t2) = B3(L[i + 1:])
             if f1 and f2: return (True, ['Imp', t1, t2])
-    #B3
-    (flag, tree) = B3(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
@@ -448,18 +500,20 @@ def B4(L):
 ##B5 ::= B4 | B5 <=> B4
 ##list<tokens> -> bool*AST
 def B5(L):
+    # B4
+    (flag, tree) = B4(L)
+    if flag: return (True, tree)
     #B5 <=> B4
     for i in range(1, len(L) - 1):
         if L[i] == '<=>':
             (f1, t1) = B5(L[0:i])
             (f2, t2) = B4(L[i + 1:])
             if f1 and f2: return (True, ['Iff', t1, t2])
-    #B4
-    (flag, tree) = B4(L)
-    if flag: return (True, tree)
+
     #error
     return (False, None)
 
-#print(Set(['{',2,',',3,'}']))
-
-print(Objs([5,'+',7]))
+#print(parse(['(',5,')']))
+#print(parse(['(',1,'+',2,')']))
+#print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
+print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
