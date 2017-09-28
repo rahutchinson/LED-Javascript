@@ -4,27 +4,35 @@
 
 ##Containers
 ##Objs ::=  Obj | obj,  Obj1   # one or more terms separated by commas
+#['cons','nil']['cons', obj, 'nil'] | ['cons', obj, cons]
+def cons(L):
+    if L[1]=='nil':
+        return []
+    elif L[2]=='nil':
+        return [L[1]]
+    else:
+        temp = [L[1]]
+        temp2 = L[2]
+        for i in range(0,len(temp2)):
+            temp.append(temp2[i])
+        return temp
 
 ##Set ::= { } | { Objs }
 ##['set'] -> {}
 ##['set', Objs] -> {Objs}
+##['Set',cons]
 def Set(L):
     return set(L[1])
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    tup=()
-    for a in L[1:]:
-        tup += a
-    return tup
-
+    return tuple(L[1])
 
 ##Seq ::= < > | < Objs> 
 ## ['seq'] -> < >
 ## ['seq', Objs] -> <Objs>
 def Seq(L):
-    return false
-
+    return L
 ##Arithmetic
 
 ##exponentiation
