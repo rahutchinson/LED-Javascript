@@ -31,6 +31,14 @@
 ##B4 ::= B3 | B4 => B3
 ##B5 ::= B4 | B5 <=> B4
 
+def parse(L):
+    (flag, tree)= Objs(L)
+    if flag:
+        return tree
+    else:
+        return None
+
+
 def ContPair(open,close):
     if open == '{' and close == '}' or open == '(' and close == ')' or open == '<' and close == '>':
         return True
@@ -55,6 +63,8 @@ def Cont(L):
 
 def Set(L):
     if L[0]=='{' and L[-1]=='}':
+        if len(L)==2:
+            return (True,['Set',cons(None,None)])
         temp=L[1:-1]
         (nextEle, remains)=nextElement(temp)
         return (True, ['Set', cons(nextEle,remains)])
@@ -62,6 +72,8 @@ def Set(L):
         return (False, None)
 
 def cons(ele,L):
+    if ele==None and L == None:
+        return ['cons','nil']
     ele=Obj(ele)[1]
     if L==None:
         return ['cons', ele, 'nil']
@@ -72,43 +84,60 @@ def cons(ele,L):
 def nextElement(L):
     stack=[]
     for i in range(0,len(L)):
-        if L[i]=='{':
+        if L[i] in ['{','<','(']:
             stack.append(L[i])
-        elif L[i]=='}':
-            stack.pop()
-
+        elif L[i] in ['}','>',')']:
+            if not ContPair(stack.pop(),L[i]):
+                return None,None
         if L[i]==',' and len(stack)==0:
             return (L[:i],L[i+1:])
-
     return L,None
 
 
 ##Tup ::= ( Obj , Objs)
 ##list<tokens> -> bool*AST
 def Tup(L):
-    if L[0] == '(':
-        (f1, t1) = Obj(L[1])
-        (f2,t2) = Objs(L[2:len(L)-1])
-        if f1 and f2 and L[len(L) - 1] == ')':
-            return (True, ['Tup', t1, t2])
-
-    return (False, None)
+    if L[0]=='(' and L[-1]==')':
+        if len(L)==2:
+            return (False,None)
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        if remains == None:
+            return (False,None)
+        return (True, ['Tup', cons(nextEle,remains)])
+    else:
+        return (False, None)
+    # if L[0] == '(':
+    #     (f1, t1) = Obj(L[1])
+    #     (f2,t2) = Objs(L[2:len(L)-1])
+    #     if f1 and f2 and L[len(L) - 1] == ')':
+    #         return (True, ['Tup', t1, t2])
+    #
+    # return (False, None)
 
 
 ##Seq ::= < > | < Objs>
 ##list<tokens> -> bool*AST
 def Seq(L):
-    #< >
-    if L[0] == '<':
-        if L[1] == '>':
-            return (True, ['<>'])
-        #< Objs >
-        else:
-            (f1, t1) = Objs(L[1:len(L) - 1])
-            if f1 and L[len(L) - 1] == '>':
-                return (True, ['Seq', t1])
-    #error
-    return (False, None)
+    if L[0]=='<' and L[-1]=='>':
+        if len(L)==2:
+            return (True,['Seq',cons(None,None)])
+        temp=L[1:-1]
+        (nextEle, remains)=nextElement(temp)
+        return (True, ['Seq', cons(nextEle,remains)])
+    else:
+        return (False, None)
+    # #< >
+    # if L[0] == '<':
+    #     if L[1] == '>':
+    #         return (True, ['<>'])
+    #     #< Objs >
+    #     else:
+    #         (f1, t1) = Objs(L[1:len(L) - 1])
+    #         if f1 and L[len(L) - 1] == '>':
+    #             return (True, ['Seq', t1])
+    # #error
+    # return (False, None)
 
 
 ##Obj ::= T4 | B5 | Cont | Str
@@ -121,10 +150,10 @@ def Obj(L):
     (flag, tree) = B5(L)
     if flag:
         return (True, tree)
-    if L[0] == '{':
-        (flag, tree) = Set(L)
-        if flag:
-            return (True, tree)
+    # if L[0] == '{':
+    #     (flag, tree) = Set(L)
+    #     if flag:
+    #         return (True, tree)
     #Cont
     (flag, tree) = Cont(L)
     if flag:
@@ -139,28 +168,41 @@ def Obj(L):
 ##Objs ::=  Obj | obj,  Obj1   # one or more terms separated by commas
 ##list<tokens> -> bool*AST
 def Objs(L):
-    trees = []
-    comaIndex = []
     if len(L)==1:
         return Obj(L)
     else:
-        for i in range(0,len(L)):
-            if L[i] == ',':
-                comaIndex.append(i)
-        for n in range(0, len(comaIndex)):
-            if n == 0:
-                trees.append(Obj(L[:comaIndex[n]])[1])
-                trees.append(',')
-            if n == len(comaIndex) - 1:
-                trees.append(Obj(L[comaIndex[n] + 1:])[1])
-            else:
-                trees.append(Obj(L[comaIndex[n] + 1:comaIndex[n + 1]])[1])
-    if(len(comaIndex)==0):
-        trees.append(Obj(L)[1])
-    if None in trees:
-        return (False, None)
-    else:
-        return(True,trees)
+        (nextEle, remains) = nextElement(L)
+        if remains == None:
+            return Obj(nextEle)
+        else:
+            (flag, tree) = Obj(nextEle)
+            if flag:
+                return tree.append(Objs(remains))
+
+    return (False,None)
+
+    # trees = []
+    # comaIndex = []
+    # if len(L)==1:
+    #     return Obj(L)
+    # else:
+    #     for i in range(0,len(L)):
+    #         if L[i] == ',':
+    #             comaIndex.append(i)
+    #     for n in range(0, len(comaIndex)):
+    #         if n == 0:
+    #             trees.append(Obj(L[:comaIndex[n]])[1])
+    #             trees.append(',')
+    #         if n == len(comaIndex) - 1:
+    #             trees.append(Obj(L[comaIndex[n] + 1:])[1])
+    #         else:
+    #             trees.append(Obj(L[comaIndex[n] + 1:comaIndex[n + 1]])[1])
+    # if(len(comaIndex)==0):
+    #     trees.append(Obj(L)[1])
+    # if None in trees:
+    #     return (False, None)
+    # else:
+    #     return(True,trees)
 
 
 
@@ -446,7 +488,6 @@ def B5(L):
     #error
     return (False, None)
 
-#print(Set(['{',2,',',3,'}']))
-
-print(Set(['{',1,'+',3,',','{',2,',',3,'}',',',4,'}']))
+#print(Objs(['{',1,'}']))
+print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
 #print(Obj(['{',1,',',2,'}']))
