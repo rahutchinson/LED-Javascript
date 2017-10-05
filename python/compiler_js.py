@@ -23,20 +23,20 @@ def cons(L):
 ##['set', Objs] -> {Objs}
 ##['Set',cons]
 def Set(L):
-    return frozenset(L[1])
+    return "Set(" + str(L[1:]) + ")"
 
 
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    return tuple(L[1])
+    return str(L[1:])
 
 
 ##Seq ::= < > | < Objs>
 ## ['seq'] -> < >
 ## ['seq', Objs] -> <Objs>
 def Seq(L):
-    return L
+    return str(L[1:])
 
 
 ##Arithmetic
@@ -45,42 +45,43 @@ def Seq(L):
 ##['exp',t1,t2] -> t1^t2
 def Exp(L):
     return L[1] ^ L[2]
+    return '(' + str(L[1]) + '^' + str(L[2]) + ')'
 
 
 ##unary increment
 ##['inc',t1] -> +t1
 def Inc(L):
-    return L[1] + 1
+    return '(' + str(L[1]) + '+ 1)'
 
 
 ##unary decrement
 ##['dec',t1] -> -t1
 def Dec(L):
-    return L[1] - 1
+    return '(' + str(L[1]) + '- 1)'
 
 
 ##multiplication
 ##['mul',t1,t2] -> t1 * t2
 def Mul(L):
-    return L[1] * L[2]
+    return '(' + str(L[1]) + '*' + str(L[2]) + ')'
 
 
 ##division
 ##['div',t1,t2] -> t1 / t2
 def Div(L):
-    return L[1] / L[2]
+    return '(' + str(L[1]) + '/' + str(L[2]) + ')'
 
 
 ##addition
 ##['add',t1,t2] -> t1 + t2
 def Add(L):
-    return L[1] + L[2]
+    return '(' + str(L[1]) + "+" + str(L[2]) + ')'
 
 
 ##subtraction
 ##['sub',t1,t2] -> t1 - t2
 def Sub(L):
-    return L[1] - L[2]
+    return '(' + str(L[1]) + '-' + str(L[2]) + ')'
 
 
 ##Sets
@@ -100,7 +101,7 @@ def Sec(L):
 ##union
 ##['union', t1, t2] -> t1 U t2
 def Union(L):
-    return frozenset(L[1].union(L[2]))
+    return "Set([..." + L[1] + ", ..." + L[2] + ")"
 
 
 ##set Diff
@@ -114,31 +115,31 @@ def SetDiff(L):
 ##Less than
 ##['<', t1, t2] -> t1 < t2
 def LT(L):
-    return L[1] < L[2]
+    return '(' + str(L[1]) + '<' + str(L[2]) + ')'
 
 
 ##Greater than
 ##['>', t1, t2] -> t1 > t2
 def GT(L):
-    return L[1] > L[2]
+    return '(' + str(L[1]) + '>' + str(L[2]) + ')'
 
 
 ##Less than or equal to
 ##['<=', t1, t2] -> t1 <= t2
 def LTE(L):
-    return L[1] <= L[2]
+    return '(' + str(L[1]) + '<=' + str(L[2]) + ')'
 
 
 ##Greater than or equal to
 ##['>=', t1, t2] -> t1 >= t2
 def GTE(L):
-    return L[1] >= L[2]
+    return '(' + str(L[1]) + '>=' + str(L[2]) + ')'
 
 
 ##Equal to
 ##['=', t1, t2] -> t1 = t2
 def EQ(L):
-    return L[1] == L[2]
+    return '(' + str(L[1]) + '==' + str(L[2]) + ')'
 
 
 ##Contained in
@@ -196,4 +197,10 @@ def evaluate(L):
 
 # print(evaluate(['Set', ['cons', 1, ['cons', ['Set', ['cons', 2, ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
 # print(evaluate(['Union', ['Set', ['cons', 1, ['cons', 2, ['cons', ['Add', 3, 4], 'nil']]]], ['Set', ['cons', ['Imp', True, False], ['cons', 7, 'nil']]]]))
+
+def comp_js(L):
+    return evaluate(L) + ";"
+
+
+print(comp_js(['Union', ["Set", 1,2,3,4], ["Set", 4,5,6,7]]))
 
