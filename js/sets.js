@@ -66,6 +66,19 @@ function setDiff(setA, setB){
 // returns setA x setB
 function cross(setA, setB){
 
+    cross_product = []
+    for(i=0; i<setA.length; i++){
+        for(j=0; j<setB.length; j++) {
+            cross_product = cross_product.concat([[i, j]])
+        }
+    }
+    return cross_product
+}
+
+// returns true if setA is a subset of setB
+function isSubset(setA, setB){
+
+
 }
 
 // returns cardinality of setA
@@ -76,3 +89,5 @@ function card(setA) {
 function pow(setA){
 
 }
+
+console.log(cross(toSet([1,2,3,1,2,1,0]),toSet([1,2,3,1,2,1,0])));

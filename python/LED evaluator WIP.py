@@ -22,7 +22,7 @@ def cons(L):
 ##['set', Objs] -> {Objs}
 ##['Set',cons]
 def Set(L):
-    return frozenset(L[1])
+    return "toSet(" + str(L[1]) + ")"
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):

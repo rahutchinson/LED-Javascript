@@ -8,7 +8,7 @@ List of strings -> List of (value, type)
 Beau Miller, Texas Tech. September 2017
 '''
 
-# from Lexer import lex
+from Lexer import lex
 import re
 
 
@@ -52,4 +52,4 @@ def tokenize(lemma_list):
 # print(lex("[5,True]"))
 # print(tokenize(lex("alpha := lambda x: x + 5")))
 
-
+# print(tokenize(lex("2+2^(4-4/5)-(18^1/5)")))
