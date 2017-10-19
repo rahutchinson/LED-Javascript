@@ -7,15 +7,11 @@
 # ['cons','nil']['cons', obj, 'nil'] | ['cons', obj, cons]
 def cons(L):
     if L[1] == 'nil':
-        return []
+        return ""
     elif L[2] == 'nil':
-        return [L[1]]
+        return str(L[1])
     else:
-        temp = [L[1]]
-        temp2 = L[2]
-        for i in range(0, len(temp2)):
-            temp.append(temp2[i])
-        return temp
+        return str(L[1])+','+str(L[2])
 
 
 ##Set ::= { } | { Objs }
@@ -23,20 +19,20 @@ def cons(L):
 ##['set', Objs] -> {Objs}
 ##['Set',cons]
 def Set(L):
-    return "Set(" + str(L[1:]) + ")"
+    return "Set(" + L[1] + ")"
 
 
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    return str(L[1:])
+    return "Tup("+L[1]+')'
 
 
 ##Seq ::= < > | < Objs>
 ## ['seq'] -> < >
 ## ['seq', Objs] -> <Objs>
 def Seq(L):
-    return str(L[1:])
+    return "Seq(" + L[1] + ")"
 
 
 ##Arithmetic
@@ -202,5 +198,5 @@ def comp_js(L):
     return evaluate(L) + ";"
 
 
-print(comp_js(['Union', ["Set", 1,2,3,4], ["Set", 4,5,6,7]]))
+print(comp_js(['Set', ['cons', 1, ['cons', ['Set', ['cons', ['Add', 2, 3], ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
 
