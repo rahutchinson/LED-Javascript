@@ -91,7 +91,7 @@ def SetProd(L):
 ##sec
 ##['sec', t1, t2] -> t1 sec t2
 def Sec(L):
-    return "sec(" + L[1] + ',' + L[2] + ')'
+    return "intersect(" + L[1] + ',' + L[2] + ')'
 
 
 ##union
