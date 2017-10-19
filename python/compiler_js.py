@@ -19,20 +19,20 @@ def cons(L):
 ##['set', Objs] -> {Objs}
 ##['Set',cons]
 def Set(L):
-    return "Set(" + L[1] + ")"
+    return "toSet(" +'[' + L[1] + ']'+ ")"
 
 
 ##Tup ::= ( Obj , Objs)
 ##['tup', Obj, Objs] -> (Obj, Objs)
 def Tup(L):
-    return "Tup("+L[1]+')'
+    return "Tup("+'['+L[1]+']'+')'
 
 
 ##Seq ::= < > | < Objs>
 ## ['seq'] -> < >
 ## ['seq', Objs] -> <Objs>
 def Seq(L):
-    return "Seq(" + L[1] + ")"
+    return "Seq("+'['+ L[1] +']'+")"
 
 
 ##Arithmetic
@@ -85,25 +85,25 @@ def Sub(L):
 ##set product
 ##['setProd', t1, t2] -> t1 * t2 #t1,t2 are sets
 def SetProd(L):
-    return set((a, b) for a in L[1] for b in L[2])
-
+    #return set((a, b) for a in L[1] for b in L[2])
+    return "cross(" + L[1] + ',' + L[2] + ')'
 
 ##sec
 ##['sec', t1, t2] -> t1 sec t2
 def Sec(L):
-    return false
+    return "sec(" + L[1] + ',' + L[2] + ')'
 
 
 ##union
 ##['union', t1, t2] -> t1 U t2
 def Union(L):
-    return "Set([..." + L[1] + ", ..." + L[2] + ")"
+    return "union(" + str(L[1]) + "," + str(L[2]) + ")"
 
 
 ##set Diff
 ##['setDiff', t1, t2] -> t1 / t2
 def SetDiff(L):
-    return L[1] - L[2]
+    return "setDiff("+L[1]+',' + L[2]+')'
 
 
 ##Conditionals
@@ -141,13 +141,13 @@ def EQ(L):
 ##Contained in
 ##['in', t1, t2] -> t1 in t2 #t1 is an Obj t2 is a container
 def In(L):
-    return L[1] in L[2]
+    return "inSet(" + L[1] + ',' + L[2] + ')'
 
 
 ##subset
 ##['subSet', t1, t2] -> t1 sub t2 #t1 and t2 are sets
 def SubSet(L):
-    return L[1].issubset(L[2])
+    return "isSubset("+L[1]+','+L[2]+')'
 
 
 ##Boolean Connectives
@@ -155,31 +155,31 @@ def SubSet(L):
 ##not
 ##['not', t1] -> ~t1
 def Not(L):
-    return not L[1]
+    return '!'+str(L[1]).lower()
 
 
 ##and
 ##['and', t1, t2] -> t1 & t2
 def And(L):
-    return L[1] and L[2]
+    return str(L[1]).lower()+'&&'+str(L[2]).lower()
 
 
 ##or
 ##['or', t1, t2] -> t1 V t2
 def Or(L):
-    return L[1] or L[2]
+    return str(L[1]).lower()+'||'+str(L[2]).lower()
 
 
 ##implication
 ##['imp', t1, t2] -> t1 => t2
 def Imp(L):
-    return not L[1] or L[2]
+    return '!' + str(L[1]).lower() + '||' + str(L[2]).lower()
 
 
 ##if and only if
 ##['iff', t1, t2] -> t1 <=> t2
 def Iff(L):
-    return (L[1] and L[2]) or (not L[1] and not L[2])
+    return '('+str(L[1]).lower()+'&&'+str(L[2]).lower()+')'+ '||' +'('+'!'+str(L[1]).lower()+'&&'+'!'+str(L[2]).lower()+')'
 
 
 def evaluate(L):
@@ -198,5 +198,5 @@ def comp_js(L):
     return evaluate(L) + ";"
 
 
-print(comp_js(['Set', ['cons', 1, ['cons', ['Set', ['cons', ['Add', 2, 3], ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
+print(comp_js(['Set', ['cons', 1, ['cons', ['Set', ['cons', ['And', True, False], ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
 
