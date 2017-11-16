@@ -16,16 +16,30 @@ def tokenize(lemma_list):
 
     token_list = []
 
+    next_digit_negative = False
+    prev_token = None
+
     for lemma in lemma_list:
 
         if lemma.isdigit():
-            token = int(lemma)
+            if next_digit_negative:
+                token = -int(lemma)
+                next_digit_negative = True
+            else:
+                token = int(lemma)
 
         elif lemma == 'True':
             token = True
 
         elif lemma == 'False':
             token = False
+
+        elif lemma == '-':
+            if prev_token.isdigit():
+                token = '-'
+            else:
+                next_digit_negative = 1
+                continue
 
         # Matches repeating decimal expressions
         # and converts it to a float where the 
@@ -44,6 +58,7 @@ def tokenize(lemma_list):
             token = lemma
 
         token_list.append(token)
+        prev_token = lemma
 
     return token_list
 
@@ -52,4 +67,5 @@ def tokenize(lemma_list):
 # print(lex("[5,True]"))
 # print(tokenize(lex("alpha := lambda x: x + 5")))
 
-# print(tokenize(lex("2+2^(4-4/5)-(18^1/5)")))
+#print(tokenize(lex("f(x,y,z) := t1 if p1")))
+print(tokenize(lex("4-1-5-6-14+(-45) ^ 29 ^ -79 +5")))
