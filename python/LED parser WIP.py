@@ -10,7 +10,7 @@
 ##Seq ::= < > | < objs>
 ##
 ##Func ::= lambda Objs :
-##
+##Func ::= identifier cont := Objs | identifier := Objs
 ##
 ##T0 ::= intNum | (  T4   )
 ##T1 ::= T0 | T0 ^ T1
