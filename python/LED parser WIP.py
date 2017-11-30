@@ -74,7 +74,7 @@ def Set(L):
 
         if len(stack)==0:
             return (False,None)
-    
+
     #proceeding once only one set is present
     if L[0]=='{' and L[-1]=='}':
         if len(L)==2:
