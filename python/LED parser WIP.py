@@ -47,8 +47,171 @@ def ContPair(open,close):
     else:
         return False
 
+'''
+def parseLHS(S):
+    if len(S)==1 and isIdentifier(S[0]):
+        return ((S[0],[]),True)
+    if isIdentifier(S[0]) and S[1]=='(' and S[len(S)-1]==')':
+        fName = S[0] # the name of the function
+        # f()
+        if len(S)==3:
+            return ((fName,[]),True)
+        t,f = parseTerms(S[2:-1])
+        if f:
+            S = S[2:len(S)-1]
+            fParams = params(S)
+            return ((fName,fParams),True)
+    return (None,False)
+ 
 
+# rule: funcBody -> Expression | conditional
+def parseFuncBody(S):
+    tree1,flag1 = parseConditional(S)
+    if flag1:
+        return (tree1,True)
+    tree2,flag2 = parseExpression(S)
+    if flag2:
+        return (tree2,True)
+    return (None,False)
 
+# rule: conditional -> ifClauses | ifClauses ; term otherwise
+def parseConditional(S):
+    if S[-1]=='otherwise':
+        S = S[:-1]
+        # find the last ';' of S
+        i = lastIndex(';',S)
+        (t2,f2)=parseIfClauses(S[0:i])
+        (t1,f1)= parseTerm(S[i+1:])
+        if f1 and f2: 
+            if(t2.op()=='cond'):
+                # add otherwise to the list of AST
+                return (AST('cond',t2.args()+[AST('ow',[t1])]),True) 
+            else:
+                return (AST('cond',[t2,AST('ow',[t1])]),True) 
+
+    tree1,flag1 = parseIfClauses(S)
+    if flag1:
+        return (tree1,True) 
+    return (None,False)    
+
+# rule: ifClasuses -> ifClause | ifClause ; ifClauses
+def parseIfClauses(S):
+    for i in range(len(S)):
+        if S[i]==';':
+            (t1,f1)=parseIfClause(S[0:i])
+            (t2,f2)= parseIfClauses(S[i+1:])
+            if f1 and f2: 
+                if(isinstance(t2.tree,list) and t2.op()=='cond'):
+                    return (AST('cond',[t1]+t2.args()),True) 
+                else:
+                    return (AST('cond',[t1,t2]),True)
+    (tree,flag) = parseIfClause(S)
+    if flag: 
+        return (tree,True)    
+    return (None,False)    
+
+# rule: ifClause -> term if statement
+def parseIfClause(S):
+    for i in range(len(S)):
+        if S[i]=='if':
+            (t1,f1)=parseTerm(S[0:i])
+            # statement and sentence are used interchangely 
+            (t2,f2)= parseSentence(S[i+1:])
+            if f1 and f2: 
+                return (AST('if',[t2,t1]),True) 
+    return (None,False)    
+
+def parseWhereClause(S):
+    #rule: whereClause -> where Stmt
+    
+    if len(S)>1 and S[0]=='where':
+        (t,f)=parseSentence(S[1:])
+        if f:
+            return (t,True)
+    return(None,False)
+'''
+'''
+
+# helper function
+# str * list<str> -> int
+# If C is a string and S is a list of string, lastIndex(C, S) is the index of the last C in S if there is at least C,
+# otherwise lastIndex(C, S) = 0
+
+def lastIndex(C, S):
+    index = 0
+    for i in range(len(S)):
+        if(S[i]==C):
+            index = i
+    return index
+            
+            
+# Expression -> Sentence | Term
+def parseExpression(S):
+    if S==None or len(S)==0:
+        return(None,False)
+    tree2,flag2 = parseSentence(S)
+    if flag2:
+        return (tree2,True)
+    tree1,flag1 = parseTerm(S)
+    if flag1:
+        return (tree1,True)
+    return (None,False)
+
+# rule: Sentence -> S6 | ( S6 )
+def parseSentence(S):
+    if S==None or len(S)==0:
+        return(None,False)
+    tree2,flag2 = parseS6(S)
+    if flag2:
+        return (tree2,True)
+    if S[0]=='(' and S[-1]==')':
+        tree1,flag1 = parseS6(S[1:-1])
+        if flag1:
+            return (tree1,True)
+    return (None,False)
+'''
+
+'''
+# rule: some  var  in  term . S2 | all   var  in  term . S2
+def parseSomeAll(S):
+    separators = ['some','all']
+    if len(S)<6:
+        return(None,False)
+    if S[0] in separators:
+        try:
+            i = S.index('in')
+            j = S.index('.')
+            t1,f1 = parseVar(S[1])
+            t2,f2 = parseTerm(S[i+1:j])
+            t3,f3 = parseS2(S[j+1:])
+            if f1 and f2 and f3:
+                return (AST(S[0],[t1,t2,t3]),True)
+        except ValueError:
+            return (None,False)
+    return (None,False)
+    
+    def universalParse(S,F):
+    helper function to remove duplicate functions
+    list<list<str>> * list<str> -> tuple
+    If S is a list of parsing list of string, and F is a list of parsing functions
+    then universalParse(S,F) = (trees,True), where trees is a list of the abstract syntax trees,
+    if each memeber of S complies to its corresponding rule in F
+    otherwise universalParse(S,F) = (None,False). 
+    For example, if S = [['Int'],['Int']], F=['TExp0','TExp0'] then universalParse(S,F)= (trees,True), 
+    where trees=[t1,t2] and t1 is AST of parseTExp0(S[0]) and t2 is the AST of parseTExp0(S[1])
+    
+    trees = []
+    flags = []
+    if len(F)>0 and len(F) ==len(S):
+        for i in range(len(F)):
+            func = functionNames(F[i])
+            t,f = func(S[i])
+            trees.append(t)
+            flags.append(f)
+        if all(flags):
+            return (trees,True)
+    return (None,False)
+'''
 ##Cont ::= Set | Tup | Seq
 ##list<tokens> -> bool*AST
 def Cont(L):
