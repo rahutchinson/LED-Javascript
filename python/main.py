@@ -15,8 +15,8 @@ def main():
     preprocessed_defs_LED = preprocess_definitions(lexed_LED)
     tokenized_LED = tokenize(preprocessed_defs_LED)
     pared_LED = parse(tokenized_LED)
-    print(tokenized_LED)
-    print(pared_LED)
+    compiled_LED_to_js = comp_func(pared_LED)
+    return compiled_LED_to_js
 
 
-main()
+print(main())
