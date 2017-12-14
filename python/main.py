@@ -7,7 +7,7 @@ from python.LED_GameCompiler_js import *
 
 FILENAME = "TicTacToe"
 
-
+'''
 def main():
     LED_file = open_LED_file(FILENAME)
     LED_code = preprocess_codeblocks(LED_file)
@@ -17,6 +17,7 @@ def main():
     pared_LED = parse(tokenized_LED)
     compiled_LED_to_js = comp_func(pared_LED)
     return compiled_LED_to_js
+'''
 
 def compile_LED_to_JS(LED_code_string):
     LED_code = preprocess_codeblocks(LED_code_string)
@@ -25,4 +26,7 @@ def compile_LED_to_JS(LED_code_string):
     tokenized_LED = tokenize(preprocessed_defs_LED)
     pared_LED = parse(tokenized_LED)
     compiled_LED_to_js = comp_func(pared_LED)
+
     return compiled_LED_to_js
+
+print(compile_LED_to_JS("/$ test := 300 $/"))

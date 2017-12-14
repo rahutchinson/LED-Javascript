@@ -183,6 +183,8 @@ def preprocess_definitions(token_array):
             tokens_in_buffer = []
 
         last_token = token
+    if current_def != []:
+        list_of_definitions += [current_def]
     for defi in list_of_definitions:
         if ":=" in defi or "iff" in defi:
             pass

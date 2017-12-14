@@ -182,6 +182,12 @@ def Or(L):
 def Imp(L):
     return '!' + str(L[1]).lower() + '||' + str(L[2]).lower()
 
+def Num(L):
+    return str(L)
+
+def Bool(L):
+    return str(L)
+
 
 ##if and only if
 ##['iff', t1, t2] -> t1 <=> t2
@@ -198,6 +204,10 @@ def funcCall(L):
 
 
 def evaluate(L):
+    if type(L) == int:
+        return L
+    if type(L) == bool:
+        return L
     f = globals()["%s" % L[0]]
     print(f)
     if L == []:
@@ -208,4 +218,4 @@ def evaluate(L):
         L[2] = evaluate(L[2])
     return f(L)
 
-print(comp_func([['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
+#print(comp_func([['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
