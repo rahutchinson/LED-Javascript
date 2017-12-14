@@ -4,6 +4,8 @@
 def comp_func(L):
     output = ''
     for definition in L:
+        global parameters
+        parameters = definition[2]
         output += "function "+str(definition[1])+'('+''.join(definition[2])+')'+'{'+'\nreturn '+str(evaluate(definition[3]))+'\n}\n'
     return output
 
@@ -186,14 +188,24 @@ def Imp(L):
 def Iff(L):
     return '('+str(L[1]).lower()+'&&'+str(L[2]).lower()+')'+ '||' +'('+'!'+str(L[1]).lower()+'&&'+'!'+str(L[2]).lower()+')'
 
+def funcCall(L):
+    print(parameters)
+    if L[2] == []:
+        if L[1] in parameters:
+            return L[1]
+        else: return L[1] + '()'
+    return L[1]+'('+str(L[2])+')'
+
 
 def evaluate(L):
     f = globals()["%s" % L[0]]
     print(f)
+    if L == []:
+        print("Got em")
     if len(L) >= 2 and isinstance(L[1], list):
         L[1] = evaluate(L[1])
-    if len(L) >= 3 and isinstance(L[2], list):
+    if len(L) >= 3 and isinstance(L[2], list) and not L[2] == []:
         L[2] = evaluate(L[2])
     return f(L)
 
-print(comp_func([['func', 'initialState', [], ['Set', ['cons', 'nil']]], ['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
+print(comp_func([['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
