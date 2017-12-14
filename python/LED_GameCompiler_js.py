@@ -4,7 +4,7 @@
 def comp_func(L):
     output = ''
     for definition in L:
-        output.append( "function "+L[0]+'('+L[1]+')'+'{'+'\nreturn'+evaluate(L[2])+'\n}\n')
+        output += "function "+str(definition[1])+'('+''.join(definition[2])+')'+'{'+'\nreturn '+str(evaluate(definition[3]))+'\n}\n'
     return output
 
 ##Containers
@@ -195,3 +195,5 @@ def evaluate(L):
     if len(L) >= 3 and isinstance(L[2], list):
         L[2] = evaluate(L[2])
     return f(L)
+
+print(comp_func([['func', 'initialState', [], ['Set', ['cons', 'nil']]], ['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
