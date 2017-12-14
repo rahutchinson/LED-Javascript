@@ -183,6 +183,11 @@ def preprocess_definitions(token_array):
             tokens_in_buffer = []
 
         last_token = token
+    for defi in list_of_definitions:
+        if ":=" in defi or "iff" in defi:
+            pass
+        else:
+            list_of_definitions.remove(defi)
     return list_of_definitions
 
 
@@ -190,5 +195,5 @@ def preprocess_definitions(token_array):
 # print(lex("alpha := lambda x: x + 5"))
 # END PROGRAM
 
-print(lex(preprocess_codeblocks(open_LED_file("TicTacToe"))))
-print(preprocess_definitions(lex(preprocess_codeblocks(open_LED_file("TicTacToe")))))
+#print(lex(preprocess_codeblocks(open_LED_file("TicTacToe"))))
+#print(preprocess_definitions(lex(preprocess_codeblocks(open_LED_file("TicTacToe")))))
