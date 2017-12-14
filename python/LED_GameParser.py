@@ -43,6 +43,29 @@ def ifClause(L):
                 return (True, ['if', t1, t2])
     return (False, None)
 
+def where(L):
+    if 'where' in L:
+        i = L.index('where')
+        items=[]
+        item = False
+        for j in L[i+1:]:
+            if j == '=':
+                item=True
+            if j == '&':
+                item=False
+                items.append(',')
+            if item:
+                items.append(j)
+
+        container = L[0:i]
+        (flag, tree) = Set(container)
+        if flag: return (True, tree)
+        (flag, tree) = Tup(container)
+        if flag: return (True, tree)
+        (flag, tree) = Seq(container)
+        if flag: return (True, tree)
+
+        return (False, None)
 '''
 
 # rule: ifClasuses -> ifClause | ifClause ; ifClauses
@@ -220,7 +243,7 @@ def funcCall(L):
     else:
         return (False, None)
 
-##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall
+##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall | where
 ##list<tokens> -> bool*AST
 def Obj(L):
     #T4
@@ -232,6 +255,9 @@ def Obj(L):
         return (True, tree)
     #S2
     (flag, tree) = S2(L)
+    if flag: return (True, tree)
+    #where
+    (flag, tree) = where(L)
     if flag: return (True, tree)
     #FuncCall
     (flag, tree) = funcCall(L)
@@ -279,13 +305,13 @@ def Objs(L):
 ##list<tokens> -> bool*AST
 def T0(L):
     #Num
-    if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, L[0])
+    if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, ['Num',L[0]])
     #funcCall
     (flag, tree) = funcCall(L)
     if flag:
         return (True, tree)
     #str
-    if isinstance(L[0], (str)) and len(L) == 1: return (True, L[0])
+    if isinstance(L[0], (str)) and len(L) == 1: return (True, ['Num',L[0]])
     #(T4) test this may need to end range at len(L)-3
     if L[0] == '(':
         (f1, t1) = T4(L[1:-1])
@@ -494,13 +520,13 @@ def Quant(L):
 ##list<tokens> -> bool*AST
 def B0(L):
     #Boolean
-    if isinstance(L[0], bool) and len(L)==1 : return (True, L[0])
+    if isinstance(L[0], bool) and len(L)==1 : return (True, ['Bool',L[0]])
     #funcCall
     (flag, tree) = funcCall(L)
     if flag:
         return (True, tree)
     #str
-    if isinstance(L[0], str) and len(L) == 1: return (True, L[0])
+    if isinstance(L[0], str) and len(L) == 1: return (True, ['Bool',L[0]])
     #( B5 )
     if L[0] == '(':
         (f1, t1) = B5(L[1:-1])
@@ -597,8 +623,8 @@ def B5(L):
 
 #print(ifClauses([-5,'if',0,'>','x',';',5,'if',0,'<','x']))
 #print(parse([['addFive', '(','a',')',':=','a','+',5],['isTrue','iff','some','x','in','{',1,',',-1,'}','.','x','>',0]]))
-print(parse([['isIn', '(','a',')','iff','test','(','a',')','V','test2','(','a',')']]))
-#print(parse(['(',1,'+',2,')']))
+#print(parse([['isIn', '(','a',')','iff','test','(','a',')','V','test2','(','a',')']]))
+#print(parse([['test', ':=',300]]))
 #print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
 #print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
 #print(parse(['{',1,',','{',2,',',3,'}',',',4,'}']))
