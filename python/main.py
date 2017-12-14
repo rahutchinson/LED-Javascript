@@ -28,5 +28,3 @@ def compile_LED_to_JS(LED_code_string):
     compiled_LED_to_js = comp_func(pared_LED)
 
     return compiled_LED_to_js
-
-print(compile_LED_to_JS("/$ test := 300 $/"))

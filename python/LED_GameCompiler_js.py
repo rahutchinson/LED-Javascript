@@ -183,10 +183,10 @@ def Imp(L):
     return '!' + str(L[1]).lower() + '||' + str(L[2]).lower()
 
 def Num(L):
-    return str(L)
+    return str(L[1])
 
 def Bool(L):
-    return str(L)
+    return str(L[1])
 
 
 ##if and only if
