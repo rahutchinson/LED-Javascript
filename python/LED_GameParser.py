@@ -201,10 +201,22 @@ def Seq(L):
 
 
 def funcCall(L):
-    if isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
-        return (True, ['funcCall',L[0],L[2:-1]])
-    elif isinstance(L[0], str) and len(L)==1:
+
+    #if isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
+    #if isinstance(L[0], str) and Tup(L[1:])[0]:
+     #   return (True, ['funcCall',L[0],L[2:-1]])
+    if isinstance(L[0], str) and len(L)==1:
         return (True, ['funcCall',L[0],[]])
+    elif isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
+        stack=[]
+        for i in range(1,len(L)-1):
+            if L[i] == '(':
+                stack.append(L[i])
+            if L[i] == ')':
+                stack.pop()
+            if len(stack)==0:
+                return (False,None)
+        return (True, ['funcCall',L[0],L[2:-1]])
     else:
         return (False, None)
 
@@ -585,7 +597,7 @@ def B5(L):
 
 #print(ifClauses([-5,'if',0,'>','x',';',5,'if',0,'<','x']))
 #print(parse([['addFive', '(','a',')',':=','a','+',5],['isTrue','iff','some','x','in','{',1,',',-1,'}','.','x','>',0]]))
-print(parse([['isIn', '(','a',')','iff','a','in','test']]))
+print(parse([['isIn', '(','a',')','iff','test','(','a',')','V','test2','(','a',')']]))
 #print(parse(['(',1,'+',2,')']))
 #print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
 #print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
