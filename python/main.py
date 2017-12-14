@@ -18,5 +18,11 @@ def main():
     compiled_LED_to_js = comp_func(pared_LED)
     return compiled_LED_to_js
 
-
-print(main())
+def compile_LED_to_JS(LED_code_string):
+    LED_code = preprocess_codeblocks(LED_code_string)
+    lexed_LED = lex(LED_code)
+    preprocessed_defs_LED = preprocess_definitions(lexed_LED)
+    tokenized_LED = tokenize(preprocessed_defs_LED)
+    pared_LED = parse(tokenized_LED)
+    compiled_LED_to_js = comp_func(pared_LED)
+    return compiled_LED_to_js
