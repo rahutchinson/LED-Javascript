@@ -58,14 +58,14 @@ A *state* is a string . States *describe* strings as given below:
 # describes the string A+c.
 
 def isSpecial(c):
-    return c in "<>=*+-^|,~.{}()[]\/:"
+    return c in "<>=*+-^|,~.{}()[]\/&:;$"
 
 
 def newState(A,c):
     if  A=='em':
-        if c.isalpha(): return 'id'
+        if c.isalpha() or c == '`': return 'id'
         elif c.isdigit(): return 'num'
-        elif c == "'": return 'str'
+        elif c == '"': return 'str'
         # elif c == "(": return 'left_paren'
         elif c == ".": return 'period'
         elif isSpecial(c):
@@ -75,7 +75,7 @@ def newState(A,c):
             elif c == ':': return ':_extendable'
             else: return 'non-extendable'
     elif A=='id':
-        if (c.isalpha() or c.isdigit()): return 'id'
+        if (c.isalpha() or c.isdigit() or c == '_'): return 'id'
     elif A == 'num':
         if c.isdigit(): return 'num'
         elif c == "(": return 'left_paren'
@@ -110,5 +110,85 @@ def newState(A,c):
     
     return 'err'
 
+
+def open_LED_file(filename):
+    with open(filename, "r") as file:
+        s = file.read()
+    return s
+
+
+def preprocess_codeblocks(file):
+    code_block = False
+
+    code_array = []
+    code_string = ''
+    last_char = None
+    for char in file:
+
+        if last_char:
+            if last_char=='/' and char == '$':
+                code_block = True
+            if last_char=='$' and char == '/':
+                code_block = False
+                code_array += [code_string[1:-2]]
+                code_string = ''
+            if code_block:
+                code_string += char
+
+        last_char = char
+    return ''.join(code_array).replace('\n',' ')
+
+
+def preprocess_definitions(token_array):
+    list_of_definitions = []
+    tokens_in_buffer = []
+    current_def = []
+    last_token = ' '
+    paren_open = False
+    for token in token_array:
+
+        if last_token[0].isalpha() and last_token != 'iff' and token == "(":
+            paren_open = True
+            tokens_in_buffer += [token]
+
+        elif paren_open and last_token == ")" and token in ["iff",":="]:
+            #print("Found def")
+            paren_open = False
+            list_of_definitions += [current_def]
+            current_def = tokens_in_buffer
+            tokens_in_buffer = []
+
+        elif last_token[0].isalpha() and token in ["iff",":="]:
+            #print("Found def",last_token,token)
+            paren_open = False
+            list_of_definitions += [current_def]
+            current_def = [last_token]
+            tokens_in_buffer = []
+
+
+        elif paren_open and last_token == ")" and token not in ["iff",":="]:
+            current_def += tokens_in_buffer
+            tokens_in_buffer = []
+            paren_open = False
+
+        elif paren_open:
+            tokens_in_buffer += [token]
+
+        elif token[0].isalpha() and not paren_open:
+            current_def += [last_token]
+            tokens_in_buffer = [token]
+
+        else:
+            current_def += [last_token]
+            tokens_in_buffer = []
+
+        last_token = token
+    return list_of_definitions
+
+
+
 # print(lex("alpha := lambda x: x + 5"))
 # END PROGRAM
+
+print(lex(preprocess_codeblocks(open_LED_file("TicTacToe"))))
+print(preprocess_definitions(lex(preprocess_codeblocks(open_LED_file("TicTacToe")))))
