@@ -84,7 +84,7 @@ def parseWhereClause(S):
 '''
 
 
-##Cont ::= Set | Tup | Seq
+##Cont ::= Set | Tup | Seq | funcCall
 ##list<tokens> -> bool*AST
 def Cont(L):
     (flag, tree) = Set(L)
@@ -93,7 +93,10 @@ def Cont(L):
     if flag: return (True, tree)
     (flag, tree) = Seq(L)
     if flag: return (True, tree)
-
+    #funcCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
     return (False, None)
 
 
@@ -197,7 +200,15 @@ def Seq(L):
     # return (False, None)
 
 
-##Obj ::= T4 | B5 | Cont | Str
+def funcCall(L):
+    if isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
+        return (True, ['funcCall',L[0],L[2:-1]])
+    elif isinstance(L[0], str) and len(L)==1:
+        return (True, ['funcCall',L[0],[]])
+    else:
+        return (False, None)
+
+##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall
 ##list<tokens> -> bool*AST
 def Obj(L):
     #T4
@@ -210,6 +221,10 @@ def Obj(L):
     #S2
     (flag, tree) = S2(L)
     if flag: return (True, tree)
+    #FuncCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
     #Cont
     (flag, tree) = Cont(L)
     if flag:
@@ -248,11 +263,15 @@ def Objs(L):
 
 
 ##
-##T0 ::= Num | str | (  T4   )
+##T0 ::= Num | funcCall | str | (  T4   )
 ##list<tokens> -> bool*AST
 def T0(L):
     #Num
     if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, L[0])
+    #funcCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
     #str
     if isinstance(L[0], (str)) and len(L) == 1: return (True, L[0])
     #(T4) test this may need to end range at len(L)-3
@@ -413,7 +432,7 @@ def S2(L):
 
 
 
-##Cond ::= T4 < T4 | T4 > T4 | T4 = T4 | T4 <= T4 | T4 >= T4 | Obj in S2 | S2 sub S2
+##Cond ::= T4 < T4 | T4 > T4 | T4 = T4 | T4 <= T4 | T4 >= T4 | Obj in Obj | S2 sub S2
 ##list<tokens> -> bool*AST
 def Cond(L):
     for i in range(1, len(L) - 1):
@@ -426,7 +445,7 @@ def Cond(L):
         #Obj in S2
         elif L[i] == 'in':
             (f1, t1) = Obj(L[0:i])
-            (f2, t2) = S2(L[i + 1:])
+            (f2, t2) = Cont(L[i + 1:])
             if f1 and f2: return (True, ['In', t1, t2])
         #S2 sub S2
         elif L[i] == 'sub':
@@ -464,6 +483,10 @@ def Quant(L):
 def B0(L):
     #Boolean
     if isinstance(L[0], bool) and len(L)==1 : return (True, L[0])
+    #funcCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
     #str
     if isinstance(L[0], str) and len(L) == 1: return (True, L[0])
     #( B5 )
@@ -562,7 +585,7 @@ def B5(L):
 
 #print(ifClauses([-5,'if',0,'>','x',';',5,'if',0,'<','x']))
 #print(parse([['addFive', '(','a',')',':=','a','+',5],['isTrue','iff','some','x','in','{',1,',',-1,'}','.','x','>',0]]))
-#print(parse(['(',5,')']))
+print(parse([['isIn', '(','a',')','iff','a','in','test']]))
 #print(parse(['(',1,'+',2,')']))
 #print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
 #print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
