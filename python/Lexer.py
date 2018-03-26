@@ -81,7 +81,7 @@ def newState(A,c):
         elif c == "(": return 'left_paren'
         elif c == ".": return 'period'
     elif A == 'str':
-        if c == "'": return 'end_str'
+        if c == '"': return 'end_str'
         else: return 'str'
     elif A == 'left_paren':
         if c.isdigit(): return 'repeat_dig'

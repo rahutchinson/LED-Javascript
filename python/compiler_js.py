@@ -198,5 +198,5 @@ def comp_js(L):
     return evaluate(L) + ";"
 
 
-print(comp_js(['Set', ['cons', 1, ['cons', ['Set', ['cons', ['And', True, False], ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
+# print(comp_js(['Set', ['cons', 1, ['cons', ['Set', ['cons', ['And', True, False], ['cons', 3, 'nil']]], ['cons', 4, 'nil']]]]))
 

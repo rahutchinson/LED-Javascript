@@ -7,30 +7,29 @@ def parse(L):
             func_def = definition.index(':=')
             params = definition[2:func_def-1]
             vals = definition[func_def+1:]
-            output.append( ['func',identifier, params,Objs(vals)[1]] )
+            output.append(['func',identifier, params,Objs(vals)[1]] )
         elif 'iff' in definition:
             rel_def = definition.index('iff')
             params = definition[2:rel_def-1]
             vals = definition[rel_def+1:]
-            output.append( ['rel',identifier,params,Objs(vals)[1]] )
+            output.append(['rel',identifier,params,Objs(vals)[1]] )
         else:
             return "error"
     return output
 
 def ifClauses(L):
+    for i in range(len(L)):
+        if L[i] == ';':
+            (f1, t1) = ifClause(L[0:i])
+            (f2, t2) = ifClauses(L[i + 1:])
+
+            if f1 and f2:
+                return (True, ['ifClauses', t1, t2])
+            if L[i+1:][1] == 'otherwise':
+                return  (True, ['ifClauses', t1, ['otherwise', L[i+1:][0]]]) # TODO : Fix this otherwise error
     (flag, tree) = ifClause(L)
     if flag:
-        return (True, tree)
-    else:
-        for i in range(len(L)):
-            if L[i] == ';':
-                (f1, t1) = ifClause(L[0:i])
-                (f2, t2) = ifClauses(L[i + 1:])
-                if f1 and f2:
-                    return (True, [t1,t2])
-        #(tree, flag) = ifClause(L)
-        if flag:
-            return (tree, True)
+        return (True, ['ifClauses', tree, 'nil'])
     return (None, False)
 
 def ifClause(L):
@@ -40,7 +39,7 @@ def ifClause(L):
             # statement and sentence are used interchangely
             (f2, t2) = B5(L[i + 1:])
             if f1 and f2:
-                return (True, ['if', t1, t2])
+                return (True, ['If', t1, t2])
     return (False, None)
 
 def where(L):
@@ -66,6 +65,7 @@ def where(L):
         if flag: return (True, tree)
 
         return (False, None)
+    return (False, None)
 '''
 
 # rule: ifClasuses -> ifClause | ifClause ; ifClauses
@@ -229,9 +229,13 @@ def funcCall(L):
     #if isinstance(L[0], str) and Tup(L[1:])[0]:
      #   return (True, ['funcCall',L[0],L[2:-1]])
     if isinstance(L[0], str) and len(L)==1:
-        return (True, ['funcCall',L[0],[]])
+        if '"' in L[0]: # if it is a quoted string instead of an identifier
+            return (False, None)
+        else:
+            return (True, ['funcCall',L[0],[]])
     elif isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
         stack=[]
+        '''
         for i in range(1,len(L)-1):
             if L[i] == '(':
                 stack.append(L[i])
@@ -240,10 +244,15 @@ def funcCall(L):
             if len(stack)==0:
                 return (False,None)
         return (True, ['funcCall',L[0],L[2:-1]])
+        '''
+        temp = L[2:-1]
+        (nextEle, remains) = nextElement(temp)
+        return (True, ['funcCall', L[0], cons(nextEle, remains)])
+
     else:
         return (False, None)
 
-##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall | where
+##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall | where | ifClause | ifClauses
 ##list<tokens> -> bool*AST
 def Obj(L):
     #T4
@@ -267,7 +276,13 @@ def Obj(L):
     (flag, tree) = Cont(L)
     if flag:
         return (True, tree)
+    #Quant
     (flag, tree) = Quant(L)
+    if flag:
+        return (True, tree)
+
+    # ifClauses
+    (flag, tree) = ifClauses(L)
     if flag:
         return (True, tree)
     #Str
@@ -361,7 +376,7 @@ def T2(L):
     return (False, None)
 
 
-##T3 ::= T2 | T3 * T2 | T3 / T2
+##T3 ::= T2 | T3 * T2 | T3 / T2 | T3 mod T2
 ##list<tokens> -> bool*AST
 def T3(L):
     # T2
@@ -380,6 +395,10 @@ def T3(L):
             (f1, t1) = T3(L[0:i])
             (f2, t2) = T2(L[i + 1:])
             if f1 and f2: return (True, ['Div', t1, t2])
+        elif L[i] == 'mod':
+            (f1, t1) = T3(L[0:i])
+            (f2, t2) = T2(L[i + 1:])
+            if f1 and f2: return (True, ['Mod', t1, t2])
 
     #error
     return (False, None)
@@ -479,6 +498,12 @@ def Cond(L):
             expComp = L[i]
             (f1, t1) = T4(L[0:i])
             (f2, t2) = T4(L[i + 1:])
+            expCompToStr = {'<':'LT',
+                            '>':'GT',
+                            '=':'EQ',
+                            '<=': 'LTE',
+                            '>=': 'GTE'}
+            expComp = expCompToStr[expComp]
             if f1 and f2: return (True, [expComp, t1, t2])
         #Obj in S2
         elif L[i] == 'in':
@@ -622,6 +647,8 @@ def B5(L):
 
 
 #print(ifClauses([-5,'if',0,'>','x',';',5,'if',0,'<','x']))
+#print(parse([['blue', ':=', -5,'if',0,'>','x',';',5,'if',0,'<','x',';',10,'if',0,'=','x']]))
+
 #print(parse([['addFive', '(','a',')',':=','a','+',5],['isTrue','iff','some','x','in','{',1,',',-1,'}','.','x','>',0]]))
 #print(parse([['isIn', '(','a',')','iff','test','(','a',')','V','test2','(','a',')']]))
 #print(parse([['test', ':=',300]]))
@@ -629,3 +656,24 @@ def B5(L):
 #print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
 #print(parse(['{',1,',','{',2,',',3,'}',',',4,'}']))
 #print(parse([2, '+', 2, '^', '(', 4, '-', 4, '/', 5, ')', '-', '(', 18, '^', 1, '/', 5, ')']))
+
+'''
+[
+    ['func', 'blue', 
+     [], 
+     [
+         ['if', 
+          ['Num', -5], 
+          ['GT', 
+           ['Num', 0], 
+           ['funcCall', 'x', 
+            []]]], 
+         ['if', 
+          ['Num', 5], 
+          ['LT', 
+           ['Num', 0], 
+           ['funcCall', 'x', 
+            []]]]]]]
+'''
+
+[['func', 'blue', [], ['ifClauses', ['if', ['Num', -5], ['GT', ['Num', 0], ['funcCall', 'x', []]]], ['ifClauses', ['if', ['Num', 5], ['LT', ['Num', 0], ['funcCall', 'x', []]]], ['if', ['Num', 10], ['EQ', ['Num', 0], ['funcCall', 'x', []]]]]]]]
