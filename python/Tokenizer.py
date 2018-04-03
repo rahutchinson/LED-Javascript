@@ -26,7 +26,7 @@ def tokenize(definition_list):
             if lex.isdigit():
                 if next_digit_negative:
                     token = -int(lex)
-                    next_digit_negative = True
+                    next_digit_negative = False
                 else:
                     token = int(lex)
 
@@ -37,10 +37,10 @@ def tokenize(definition_list):
                 token = False
 
             elif lex == '-':
-                if prev_token.isdigit():
+                if prev_token.isdigit() or prev_token.isalnum():
                     token = '-'
                 else:
-                    next_digit_negative = 1
+                    next_digit_negative = True
                     continue
 
             # Matches repeating decimal expressions

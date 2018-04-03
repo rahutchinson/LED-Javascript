@@ -34,6 +34,21 @@ def compile_LED_to_JS(LED_code_string):
 
     return compiled_LED_to_js
 
+def compile_LED_file_to_JS(filename):
+    LED_code_string = open_LED_file(filename)
+    LED_code = preprocess_codeblocks(LED_code_string)
+    lexed_LED = lex(LED_code)
+    preprocessed_defs_LED = preprocess_definitions(lexed_LED)
+    tokenized_LED = tokenize(preprocessed_defs_LED)
+    pared_LED = parse(tokenized_LED)
+    compiled_LED_to_js = comp_func(pared_LED)
+
+    return compiled_LED_to_js
+
+
+print(compile_LED_file_to_JS("NaughtsAndCrosses"))
+
+
 #print(compile_LED_to_JS("/$ newState := segment(point(1,2),point(3,4),BLACK) $/"))
 #print(compile_LED_to_JS("/$ legalToMoveIn(c) iff ~occupied(c) & ~gameOver $/"))
 
@@ -41,30 +56,29 @@ def compile_LED_to_JS(LED_code_string):
 
 #print(compile_LED_to_JS("/$ playerToMove := `x if even(|currentState|); `o otherwise $/"))
 
-#print(compile_LED_to_JS("/$ x := <L1> where L1 = segment(point(100,100),point(200,200),BLACK) $/"))
+#print(compile_LED_to_JS('''/$
+#                              $/'''''))
+#print(compile_LED_to_JS('/$   gameOver(S) := True if |S| = 9 V xWon(S) V yWon(S); False otherwise $/'))
 
-#print(compile_LED_to_JS('/$ initialState := < "0" > $/'))
 
 """
 print(compile_LED_to_JS('''/$ 
 
                           displayImages(S) := square0 if S = "0"; 
-                                                square1 if S = 1; 
-                                                square2 if S = 2; 
-                                                square3 if S = 3; 
-                                                square4 if S = 4;
-                                                empty otherwise
+                                                 
+                                                square4 if S = "4";
+                                                {} otherwise
                                                 
                         $/
                         '''))
 """
-
+"""
 print(compile_LED_to_JS('''/$
 cellClicked(c) iff
   mouseClicked &
   mouseX > xMin(c) 
 $/'''))
-
+"""
     #legalToMoveIn(c) iff ~occupied(c) & ~gameOver
 
 '''

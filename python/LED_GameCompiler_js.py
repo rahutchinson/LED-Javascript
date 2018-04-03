@@ -130,6 +130,8 @@ def Union(L):
 def SetDiff(L):
     return "setDiff("+L[1]+',' + L[2]+')'
 
+def Card(L):
+    return "card(" +L[1] +")"
 
 ##Conditionals
 
@@ -180,31 +182,31 @@ def SubSet(L):
 ##not
 ##['not', t1] -> ~t1
 def Not(L):
-    return '!'+str(L[1]).lower()
+    return '!'+str(L[1])
 
 
 ##and
 ##['and', t1, t2] -> t1 & t2
 def And(L):
-    return str(L[1]).lower()+'&&'+str(L[2]).lower()
+    return str(L[1])+'&&'+str(L[2])
 
 
 ##or
 ##['or', t1, t2] -> t1 V t2
 def Or(L):
-    return str(L[1]).lower()+'||'+str(L[2]).lower()
+    return str(L[1])+'||'+str(L[2])
 
 
 ##implication
 ##['imp', t1, t2] -> t1 => t2
 def Imp(L):
-    return '!' + str(L[1]).lower() + '||' + str(L[2]).lower()
+    return '!' + str(L[1]) + '||' + str(L[2])
 
 def Num(L):
     return str(L[1])
 
 def Bool(L):
-    return str(L[1])
+    return str(L[1]).lower()
 
 
 def segment(L):
@@ -212,7 +214,7 @@ def segment(L):
 
 
 def point(L):
-    return 'pfdsaoint('+str(L[1])+')'
+    return 'point('+str(L[1])+')'
 
 def If(L):
     return 'if(' + str(L[2]) + '){\nreturn(' + str(L[1]) + ');\n}\n'
@@ -224,7 +226,7 @@ def otherwise(L):
 ##if and only if
 ##['iff', t1, t2] -> t1 <=> t2
 def Iff(L):
-    return '('+str(L[1]).lower()+'&&'+str(L[2]).lower()+')'+ '||' +'('+'!'+str(L[1]).lower()+'&&'+'!'+str(L[2]).lower()+')'
+    return '('+str(L[1])+'&&'+str(L[2])+')'+ '||' +'('+'!'+str(L[1])+'&&'+'!'+str(L[2])+')'
 
 def funcCall(L):
     if L[2] == []:

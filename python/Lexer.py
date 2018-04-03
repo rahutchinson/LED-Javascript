@@ -145,7 +145,7 @@ def preprocess_definitions(token_array):
     current_def = []
     last_token = ' '
     paren_open = False
-    for token in token_array:
+    for token in token_array + [' ']:
 
         if last_token[0].isalpha() and last_token != 'iff' and token == "(":
             paren_open = True
@@ -168,7 +168,7 @@ def preprocess_definitions(token_array):
 
         elif paren_open and last_token == ")" and token not in ["iff",":="]:
             current_def += tokens_in_buffer
-            tokens_in_buffer = []
+            tokens_in_buffer = [token]
             paren_open = False
 
         elif paren_open:
@@ -183,8 +183,11 @@ def preprocess_definitions(token_array):
             tokens_in_buffer = []
 
         last_token = token
+
+    if tokens_in_buffer != [] and tokens_in_buffer != [' ']:
+        current_def += tokens_in_buffer
     if current_def != []:
-        list_of_definitions += [current_def + [last_token]]
+        list_of_definitions += [current_def]
     for defi in list_of_definitions:
         if ":=" in defi or "iff" in defi:
             pass

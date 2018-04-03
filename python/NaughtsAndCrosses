@@ -1,0 +1,147 @@
+
+
+NAUGHTS AND CROSSES
+
+Written in LED by Beau Miller, 4/2/2018
+
+/$
+
+initialState() := <>
+
+displayImages(S) := gridDisplay U piecesOnGrid(S) U gameOverImage(S)
+
+piecesOnGrid(S) := cell11(S) U cell12(S) U cell13(S) U cell21(S) U cell22(S) U cell23(S) U cell31(S) U cell32(S) U cell33(S)
+
+cell11(S) := xIcon(150,150) if "11x" in S;
+            oIcon(150,150) if "11o" in S;
+            <> otherwise
+cell12(S) := xIcon(250,150) if "12x" in S;
+            oIcon(250,150) if "12o" in S;
+            <> otherwise
+cell13(S) := xIcon(350,150) if "13x" in S;
+            oIcon(350,150) if "13o" in S;
+            <> otherwise
+cell21(S) := xIcon(150,250) if "21x" in S;
+            oIcon(150,250) if "21o" in S;
+            <> otherwise
+cell22(S) := xIcon(250,250) if "22x" in S;
+            oIcon(250,250) if "22o" in S;
+            <> otherwise
+cell23(S) := xIcon(350,250) if "23x" in S;
+            oIcon(350,250) if "23o" in S;
+            <> otherwise
+cell31(S) := xIcon(150,350) if "31x" in S;
+            oIcon(150,350) if "31o" in S;
+            <> otherwise
+cell32(S) := xIcon(250,350) if "32x" in S;
+            oIcon(250,350) if "32o" in S;
+            <> otherwise
+cell33(S) := xIcon(350,350) if "33x" in S;
+            oIcon(350,350) if "33o" in S;
+            <> otherwise
+
+
+xIcon(centerX,centerY) :=
+            <
+            segment(point(centerX - 50,centerY - 50),point(centerX + 50,centerY + 50),BLUE),
+            segment(point(centerX - 50,centerY + 50),point(centerX + 50,centerY - 50),BLUE)
+            >
+
+oIcon(centerX,centerY) :=
+            <
+            disc(point(centerX,centerY), 50, RED)
+            >
+
+gameOverImage(S) :=
+            <
+            text(gameOverText(S), point(600, 250),20,BLACK)
+            >
+
+
+gridDisplay := <
+                segment(point(200,100),point(200,400),BLACK),
+                segment(point(300,100),point(300,400),BLACK),
+                segment(point(100,200),point(400,200),BLACK),
+                segment(point(100,300),point(400,300),BLACK)
+                >
+
+centerX(c):= 150+100*((c-1) mod 3)
+centerO(c):= 350-100*(floor((c-1)/3))
+
+xMin(c) :=  100+100*((c-1) mod 3)
+xMax(c) :=  200+100*((c-1) mod 3)
+yMin(c) :=  300-100*(floor((c-1)/3))
+yMax(c) :=  400-100*(floor((c-1)/3))
+
+clickXInCell := floor(mouseX / 100)
+clickYInCell := floor(mouseY / 100)
+
+cellEmpty(rowcol, S) iff ~rowcol+"x" in S & ~rowcol+"o" in S
+
+cellClicked := ""+clickYInCell + ""+clickXInCell if clickXInCell > 0 & clickXInCell < 4 & clickYInCell > 0 & clickYInCell < 4;
+                "no cell clicked" otherwise
+
+even(n) iff n mod 2=0
+
+playerToMove(S):=
+     "x" if even(|S|);
+     "o" otherwise
+
+gameOver(S) := True if |S| = 9 V xWon(S) V oWon(S);
+               False otherwise
+
+gameOverText(S) := "X Wins!" if xWon(S);
+                   "O Wins!" if oWon(S);
+                   "Cat's Game" if |S| > 9;
+                   "" otherwise
+
+threeInARow(S) := "x" if xRow(S);
+                  "o" if oRow(S);
+                  "" otherwise
+
+
+moveMade(S) := "" if cellClicked = "no cell clicked" V ~cellEmpty(cellClicked,S);
+               cellClicked + playerToMove(S) otherwise
+
+transition(S) := S U {"GAMEOVER"} if gameOver(S);
+                 S U moveMade(S) if ~moveMade(S) = "";
+                 S otherwise
+
+
+xWon(S) iff xTopRow(S) V xMiddleRow(S) V xBottomRow(S) V xLeftCol(S) V xMiddleCol(S) V xRightCol(S) V xDownDiag(S) V xUpDiag(S)
+
+oWon(S) iff oTopRow(S) V oMiddleRow(S) V oBottomRow(S) V oLeftCol(S) V oMiddleCol(S) V oRightCol(S) V oDownDiag(S) V oUpDiag(S)
+
+
+xTopRow(S) iff "11x" in S & "12x" in S & "13x" in S
+xMiddleRow(S) iff "21x" in S & "22x" in S & "23x" in S
+xBottomRow(S) iff "31x" in S & "32x" in S & "33x" in S
+xLeftCol(S) iff "11x" in S & "21x" in S & "31x" in S
+xMiddleCol(S) iff "12x" in S & "22x" in S & "32x" in S
+xRightCol(S) iff "13x" in S & "23x" in S & "33x" in S
+xDownDiag(S) iff "11x" in S & "22x" in S & "33x" in S
+xUpDiag(S) iff "13x" in S & "22x" in S & "31x" in S
+
+
+oTopRow(S) iff "11o" in S & "12o" in S & "13o" in S
+oMiddleRow(S) iff "21o" in S & "22o" in S & "23o" in S
+oBottomRow(S) iff "31o" in S & "32o" in S & "33o" in S
+oLeftCol(S) iff "11o" in S & "21o" in S & "31o" in S
+oMiddleCol(S) iff "12o" in S & "22o" in S & "32o" in S
+oRightCol(S) iff "13o" in S & "23o" in S & "33o" in S
+oDownDiag(S) iff "11o" in S & "22o" in S & "33o" in S
+oUpDiag(S) iff "13o" in S & "22o" in S & "31o" in S
+
+$/
+
+
+
+xRow(S) := 3 if "11x" in S & "12x" in S & "13x" in S;
+           x if "21x" in S & "22x" in S & "33x" in S;
+           x if "31x" in S & "32x" in S & "33x" in S;
+           x if "11x" in S & "21x" in S & "31x" in S;
+           x if "12x" in S & "22x" in S & "32x" in S;
+           x if "13x" in S & "23x" in S & "33x" in S;
+           x if "11x" in S & "22x" in S & "33x" in S;
+           True if "13x" in S & "22x" in S & "31x" in S;
+           False otherwise

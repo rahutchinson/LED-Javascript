@@ -25,8 +25,10 @@ def ifClauses(L):
 
             if f1 and f2:
                 return (True, ['ifClauses', t1, t2])
-            if L[i+1:][1] == 'otherwise':
-                return  (True, ['ifClauses', t1, ['otherwise', L[i+1:][0]]]) # TODO : Fix this otherwise error
+            if L[i+1:][-1] == 'otherwise':
+                (f3, t3) = Objs(L[i + 1:][:-1])
+                if f3:
+                    return  (True, ['ifClauses', t1, ['otherwise', t3]]) # TODO : Fix this otherwise error
     (flag, tree) = ifClause(L)
     if flag:
         return (True, ['ifClauses', tree, 'nil'])
@@ -35,7 +37,7 @@ def ifClauses(L):
 def ifClause(L):
     for i in range(len(L)):
         if L[i] == 'if':
-            (f1, t1) = T4(L[0:i])
+            (f1, t1) = Objs(L[0:i])
             # statement and sentence are used interchangely
             (f2, t2) = B5(L[i + 1:])
             if f1 and f2:
@@ -133,8 +135,8 @@ def Set(L):
         elif L[i] == '}':
             stack.pop()
 
-        if len(stack)==0:
-            return (False,None)
+    if len(stack)==0:
+        return (False,None)
 
     #proceeding once only one set is present
     if L[0]=='{' and L[-1]=='}':
@@ -233,7 +235,7 @@ def funcCall(L):
             return (False, None)
         else:
             return (True, ['funcCall',L[0],[]])
-    elif isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
+    elif isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')' and balancedParensHelper(L):
         stack=[]
         '''
         for i in range(1,len(L)-1):
@@ -252,42 +254,63 @@ def funcCall(L):
     else:
         return (False, None)
 
-##Obj ::= T4 | B5 | Cont | Quant | Str | FuncCall | where | ifClause | ifClauses
+def balancedParensHelper(L):
+    if isinstance(L[0], str) and len(L) >= 3 and L[1] == '(' and L[-1] == ')':
+        stack = []
+        for i in range(1, len(L) - 1):
+            if L[i] == '(':
+                stack.append(L[i])
+            if L[i] == ')':
+                stack.pop()
+            if len(stack) == 0:
+                return False
+        return True
+
+##Obj ::= B5 | T4 | Cont | Quant | FuncCall | where | ifClause | ifClauses | Str
 ##list<tokens> -> bool*AST
 def Obj(L):
     #T4
     (flag, tree) = T4(L)
     if flag: return (True, tree)
+
     #B5
     (flag, tree) = B5(L)
     if flag:
         return (True, tree)
+
     #S2
     (flag, tree) = S2(L)
     if flag: return (True, tree)
-    #where
-    (flag, tree) = where(L)
-    if flag: return (True, tree)
-    #FuncCall
-    (flag, tree) = funcCall(L)
-    if flag:
-        return (True, tree)
+
     #Cont
     (flag, tree) = Cont(L)
     if flag:
         return (True, tree)
+
     #Quant
     (flag, tree) = Quant(L)
     if flag:
         return (True, tree)
 
+    #FuncCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
+
+
+    #where
+    (flag, tree) = where(L)
+    if flag: return (True, tree)
+
     # ifClauses
     (flag, tree) = ifClauses(L)
     if flag:
         return (True, tree)
+
     #Str
     elif len(L)==1 and isinstance(L[0], str):
         return (True, [L[0]])
+
     #error
     return (False, None)
 
@@ -316,11 +339,11 @@ def Objs(L):
 
 
 ##
-##T0 ::= Num | funcCall | str | (  T4   )
+##T0 ::= Num | funcCall | str | (  T4  ) | |S2|
 ##list<tokens> -> bool*AST
 def T0(L):
     #Num
-    if isinstance(L[0], (int, float, complex)) and len(L)==1: return (True, ['Num',L[0]])
+    if isinstance(L[0], (int, float, complex)) and len(L)==1 and not isinstance(L[0], bool): return (True, ['Num',L[0]])
     #funcCall
     (flag, tree) = funcCall(L)
     if flag:
@@ -332,6 +355,10 @@ def T0(L):
         (f1, t1) = T4(L[1:-1])
         if f1 and L[-1] == ')':
             return (True, t1)
+    # cardinality of a set
+    if L[0] == '|' and L[-1] == '|':
+        (f1, t1) = S2(L[1:-1])
+        if f1: return (True, ['Card', t1])
     #error
     return (False, None)
 
@@ -376,7 +403,7 @@ def T2(L):
     return (False, None)
 
 
-##T3 ::= T2 | T3 * T2 | T3 / T2 | T3 mod T2
+##T3 ::= T2 | T3 * T2 | T3 / T2 | T3 mod T2 |
 ##list<tokens> -> bool*AST
 def T3(L):
     # T2
@@ -428,12 +455,16 @@ def T4(L):
     return (False, None)
 
 
-##S0 ::= Set | ( S2 )
+##S0 ::= Set | fuctCall | ( S2 )
 ##list<tokens> -> bool*AST
 def S0(L):
     #Set
     (flag, tree) = Set(L)
     if flag: return (True, tree)
+    #funcCall
+    (flag, tree) = funcCall(L)
+    if flag:
+        return (True, tree)
     #(S2)
     if L[0] == '(':
         (f1, t1) = S2(L[1:-1])
@@ -550,8 +581,8 @@ def B0(L):
     (flag, tree) = funcCall(L)
     if flag:
         return (True, tree)
-    #str
-    if isinstance(L[0], str) and len(L) == 1: return (True, ['Bool',L[0]])
+    #str                                                                        # TODO : Remove
+    # if isinstance(L[0], str) and len(L) == 1: return (True, ['Bool',L[0]])
     #( B5 )
     if L[0] == '(':
         (f1, t1) = B5(L[1:-1])

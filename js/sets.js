@@ -83,11 +83,10 @@ function isSubset(setA, setB){
 
 // returns cardinality of setA
 function card(setA) {
-    setA.length;
+    return setA.length;
 }
 
 function pow(setA){
 
 }
 
-console.log(cross(toSet([1,2,3,1,2,1,0]),toSet([1,2,3,1,2,1,0])));
