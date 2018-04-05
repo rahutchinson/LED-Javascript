@@ -5,4 +5,5 @@
 
 
 # JS Quirks
- - http://charlieharvey.org.uk/page/javascript_the_weird_parts 
+ - http://charlieharvey.org.uk/page/javascript_the_weird_parts \
+ - https://www.destroyallsoftware.com/talks/wat
