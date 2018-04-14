@@ -135,8 +135,8 @@ def Set(L):
         elif L[i] == '}':
             stack.pop()
 
-    if len(stack)==0:
-        return (False,None)
+        if len(stack)==0:
+            return (False,None)
 
     #proceeding once only one set is present
     if L[0]=='{' and L[-1]=='}':
@@ -230,12 +230,13 @@ def funcCall(L):
     #if isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')':
     #if isinstance(L[0], str) and Tup(L[1:])[0]:
      #   return (True, ['funcCall',L[0],L[2:-1]])
+    specialCharacters = "<>=*+-^|,~.{}()[]\/&:;$"
     if isinstance(L[0], str) and len(L)==1:
         if '"' in L[0]: # if it is a quoted string instead of an identifier
             return (False, None)
         else:
             return (True, ['funcCall',L[0],[]])
-    elif isinstance(L[0], str) and len(L)>=3 and L[1] == '(' and L[-1] == ')' and balancedParensHelper(L):
+    elif isinstance(L[0], str) and L[0] not in specialCharacters and len(L)>=3 and L[1] == '(' and L[-1] == ')' and balancedParensHelper(L):
         stack=[]
         '''
         for i in range(1,len(L)-1):
@@ -269,12 +270,18 @@ def balancedParensHelper(L):
 ##Obj ::= B5 | T4 | Cont | Quant | FuncCall | where | ifClause | ifClauses | Str
 ##list<tokens> -> bool*AST
 def Obj(L):
-    #T4
+
+    # B5
+    (flag, tree) = B5(L)
+    if flag:
+        return (True, tree)
+
+    # T4
     (flag, tree) = T4(L)
     if flag: return (True, tree)
 
-    #B5
-    (flag, tree) = B5(L)
+    # ifClauses
+    (flag, tree) = ifClauses(L)
     if flag:
         return (True, tree)
 
@@ -302,10 +309,7 @@ def Obj(L):
     (flag, tree) = where(L)
     if flag: return (True, tree)
 
-    # ifClauses
-    (flag, tree) = ifClauses(L)
-    if flag:
-        return (True, tree)
+
 
     #Str
     elif len(L)==1 and isinstance(L[0], str):
@@ -351,9 +355,9 @@ def T0(L):
     #str
     if isinstance(L[0], (str)) and len(L) == 1: return (True, ['Num',L[0]])
     #(T4) test this may need to end range at len(L)-3
-    if L[0] == '(':
+    if L[0] == '(' and L[-1] == ')':
         (f1, t1) = T4(L[1:-1])
-        if f1 and L[-1] == ')':
+        if f1:
             return (True, t1)
     # cardinality of a set
     if L[0] == '|' and L[-1] == '|':
@@ -577,8 +581,10 @@ def Quant(L):
 def B0(L):
     #Boolean
     if isinstance(L[0], bool) and len(L)==1 : return (True, ['Bool',L[0]])
+    print("got here boolean")
     #funcCall
     (flag, tree) = funcCall(L)
+    print("got here string")
     if flag:
         return (True, tree)
     #str                                                                        # TODO : Remove
@@ -587,8 +593,10 @@ def B0(L):
     if L[0] == '(':
         (f1, t1) = B5(L[1:-1])
         if f1 and L[-1] == ')': return (True, t1)
+    print("got here ( ) ")
     #Cond
     (flag, tree) = Cond(L)
+    print("Got here cond")
     if flag: return (True, tree)
     #error
     return (False, None)
@@ -687,6 +695,12 @@ def B5(L):
 #print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
 #print(parse(['{',1,',','{',2,',',3,'}',',',4,'}']))
 #print(parse([2, '+', 2, '^', '(', 4, '-', 4, '/', 5, ')', '-', '(', 18, '^', 1, '/', 5, ')']))
+
+
+
+# ['cellClicked', ':=', 'clickXInCell', '+', '(', 'clickYInCell', '-', 1, ')', '*', 3, 'if', 'clickXInCell', '>', 0, '&', 'clickXInCell', '<', 4, '&', 'clickYInCell', '>', 0, '&', 'clickYInCell', '<', 4, ';', '"no cell clicked"', 'otherwise']
+#print(T4(['clickXInCell', '+', '(', 'clickYInCell', '-', 1, ')', '*', 3, 'if', 'clickXInCell', '>', 0, ';', '"no cell clicked"', 'otherwise']))
+print(Obj(['~', '(', 'moveMade', '(', 'S', ')', 'in', '{', '{', '}', '}', ')']))
 
 '''
 [

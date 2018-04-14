@@ -46,7 +46,7 @@ def compile_LED_file_to_JS(filename):
     return compiled_LED_to_js
 
 
-print(compile_LED_file_to_JS("NaughtsAndCrosses"))
+print(compile_LED_file_to_JS("NaughtsAndCrossesTrue"))
 
 
 #print(compile_LED_to_JS("/$ newState := segment(point(1,2),point(3,4),BLACK) $/"))
@@ -56,9 +56,9 @@ print(compile_LED_file_to_JS("NaughtsAndCrosses"))
 
 #print(compile_LED_to_JS("/$ playerToMove := `x if even(|currentState|); `o otherwise $/"))
 
-#print(compile_LED_to_JS('''/$
-#                              $/'''''))
-#print(compile_LED_to_JS('/$   gameOver(S) := True if |S| = 9 V xWon(S) V yWon(S); False otherwise $/'))
+#print(compile_LED_to_JS('''/$  transition(S) := ~ (moveMade(S) in {{}})
+#                        $/
+#                        '''))
 
 
 """
