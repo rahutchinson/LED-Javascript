@@ -149,14 +149,3 @@ oUpDiag(S) iff {3, "o"} in S & {5, "o"} in S & {7, "o"} in S
 
 $/
 
-
-
-xRow(S) := 3 if "11x" in S & "12x" in S & "13x" in S;
-           x if "21x" in S & "22x" in S & "33x" in S;
-           x if "31x" in S & "32x" in S & "33x" in S;
-           x if "11x" in S & "21x" in S & "31x" in S;
-           x if "12x" in S & "22x" in S & "32x" in S;
-           x if "13x" in S & "23x" in S & "33x" in S;
-           x if "11x" in S & "22x" in S & "33x" in S;
-           True if "13x" in S & "22x" in S & "31x" in S;
-           False otherwise

@@ -1,14 +1,14 @@
 '''
 Tokenizer
 
-Converts output from lemmatize into a list of tokens and their types
+Converts output from lex into a list of tokens and their types
 
 List of strings -> List of (value, type)
 
 Beau Miller, Texas Tech. September 2017
 '''
 
-from Lexer import lex
+from Lexer import *
 import re
 
 
@@ -66,9 +66,3 @@ def tokenize(definition_list):
     return list_of_token_lists
 
 
-# print(lex("True"))
-# print(lex("[5,True]"))
-# print(tokenize(lex("alpha := lambda x: x + 5")))
-
-#print(tokenize(lex("f(x,y,z) := t1 if p1")))
-#print(tokenize(lex("4-1-5-6-14+(-45) ^ 29 ^ -79 +5")))

@@ -7,43 +7,42 @@ March 2017
 # whiteChar(c) iff c is a whitespace character.
 def whiteChar(c): return (c in " \r\n\t\v")
 
-# tokenize(s) = Tokenize(s), whenever Tokenize(s) is defined
+# lex(s)
 def lex(s):
-  i = 0 
-  tokens = [ ]
-  # invariants:0 <= i <= len(s),  tokens = Tokenize(s[:i]),
-  while i < len(s):
-    if whiteChar(s[i]): 
-      i = i+1
-    elif i < len(s)-1 and s[i:i+2] == "//":
-      # skip the comment until the next return or new line character
-      i = i+2
-      while i < len(s) and s[i] not in "\r\n": 
-        i = i+1
-    else: 
-      # process the longest possible token
-      tok = munch(s,i)
-      tokens.append(tok)
-      i = i + len(tok)
-  return tokens
+    i = 0
+    tokens = [ ]
+    # invariants:0 <= i <= len(s),  tokens = lex(s[:i]),
+    while i < len(s):
+        if whiteChar(s[i]):
+            i = i+1
+        elif i < len(s)-1 and s[i:i+2] == "//":
+            # skip the comment until the next return or new line character
+            i = i+2
+            while i < len(s) and s[i] not in "\r\n":
+                i = i+1
+        else:
+            # process the longest possible token
+            tok = munch(s,i)
+            tokens.append(tok)
+            i = i + len(tok)
+    return tokens
 
  
 # If 0<= i < len(s) and s[i:] begins with a token, then munch(s,i)
 # is longest token that is a prefix of s[i:]
 
 def munch(s,i):
-  A,j = 'em',i
-  # invariants: i <= j <= len(s), A is the state that describes s[i:j] 
-  while True:
-    if j == len(s): break # end of string
-    A = newState(A,s[j])
-    # A is now the state that *would* result if we process
-    # one more character. 
-    if A == 'err': break
-    # A is not 'err', so good with one more character
-    j = j+1 
-  return s[i:j]
-  
+    A,j = 'em',i
+    # invariants: i <= j <= len(s), A is the state that describes s[i:j]
+    while True:
+        if j == len(s): break # end of string
+        A = newState(A,s[j])
+        # A is now the state that *would* result if we process
+        # one more character.
+        if A == 'err': break
+        # A is not 'err', so good with one more character
+        j = j+1
+    return s[i:j]
 
 
 '''
@@ -111,10 +110,11 @@ def newState(A,c):
     return 'err'
 
 
-def open_LED_file(filename):
+def open_file_as_string(filename):
     with open(filename, "r") as file:
         s = file.read()
     return s
+
 
 
 def preprocess_codeblocks(file):
@@ -152,19 +152,16 @@ def preprocess_definitions(token_array):
             tokens_in_buffer += [token]
 
         elif paren_open and last_token == ")" and token in ["iff",":="]:
-            #print("Found def")
             paren_open = False
             list_of_definitions += [current_def]
             current_def = tokens_in_buffer
             tokens_in_buffer = []
 
         elif last_token[0].isalpha() and token in ["iff",":="]:
-            #print("Found def",last_token,token)
             paren_open = False
             list_of_definitions += [current_def]
             current_def = [last_token]
             tokens_in_buffer = []
-
 
         elif paren_open and last_token == ")" and token not in ["iff",":="]:
             current_def += tokens_in_buffer
@@ -195,10 +192,3 @@ def preprocess_definitions(token_array):
             list_of_definitions.remove(defi)
     return list_of_definitions
 
-
-
-# print(lex("alpha := lambda x: x + 5"))
-# END PROGRAM
-
-#print(lex(preprocess_codeblocks(open_LED_file("TicTacToe"))))
-#print(preprocess_definitions(lex(preprocess_codeblocks(open_LED_file("TicTacToe")))))

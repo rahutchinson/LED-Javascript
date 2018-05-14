@@ -243,70 +243,10 @@ def evaluate(L):
         return L
     f = globals()["%s" % L[0]]
     if L == []:
-        print("Got em")
+        pass
     if len(L) >= 2 and isinstance(L[1], list):
         L[1] = evaluate(L[1])
     if len(L) >= 3 and isinstance(L[2], list) and not L[2] == []:
         L[2] = evaluate(L[2])
         #L[2] = L[2]
     return f(L)
-
-#print(comp_func([['rel', 'occupies', ['p', ',', 'c'], ['In', ['Tup', ['cons', ['funcCall', 'p', []], ['cons', ['funcCall', 'c', []], 'nil']]], ['funcCall', 'currentState', []]]]]))
-#print(comp_func([['func', 'newState', [], ['funcCall', 'segment', ['cons', ['funcCall', 'point', ['(', 1, ',', 2, ')']], ',', ['funcCall', 'point', ['(', 1, ',', 2, ')']], ',', 'BLACK']]]]))
-#print(comp_func([['func', 'newState', [], ['funcCall', 'segment', []]]]))
-
-
-## [['func', 'newState', [], ['funcCall', 'segment', ['point', '(', 1, ',', 2, ')', ',', 'point', '(', 3, ',', 4, ')', ',', 'BLACK']]]]
-
-#print(evaluate(['cons', '1', ['cons', '2', 'nil']]))
-
-#print(comp_func([['func', 'blue', [], ['ifClauses', ['If', ['Num', -5], ['GT', ['Num', 0], ['funcCall', 'x', []]]], ['ifClauses', ['If', ['Num', 5], ['LT', ['Num', 0], ['funcCall', 'x', []]]], ['ifClauses', ['If', ['Num', 10], ['EQ', ['Num', 0], ['funcCall', 'x', []]]], 'nil']]]]]))
-
-
-'''
-
-function blue(){
-    if(0>x()){
-        return(-5);
-    }
-    else if(0<x()){
-        return(5);
-    }
-    else if(0==x()){
-        return(10);
-    }
-}
-
-
-function playerToMove(){
-    if(even(None)){
-        return(`x());
-    }
-    else { 
-        return(`o); 
-    }
-}
-
-
-function displayImages(S){
-  
-  if(S == '0'){
-    return(square0());
-  }
-  else if(S == '1'){
-    return(square1());
-  }
-  else if(S == '2'){
-    return(square2());
-  }
-  else if(S == '3'){
-    return(square3());
-  }
-  else if(S == '4'){
-    return(square4());
-  }
-  return([[]]);
-}
-
-
-'''

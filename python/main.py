@@ -2,23 +2,13 @@ from python.Lexer import *
 from python.Tokenizer import *
 from python.LED_GameParser import *
 from python.LED_GameCompiler_js import *
+import os
+import shutil
 
 
 
-FILENAME = "TicTacToe"
 
-'''
-def main():
-    LED_file = open_LED_file(FILENAME)
-    LED_code = preprocess_codeblocks(LED_file)
-    lexed_LED = lex(LED_code)
-    preprocessed_defs_LED = preprocess_definitions(lexed_LED)
-    tokenized_LED = tokenize(preprocessed_defs_LED)
-    pared_LED = parse(tokenized_LED)
-    compiled_LED_to_js = comp_func(pared_LED)
-    return compiled_LED_to_js
-'''
-
+# This function is used for debugging purposes and will print the results of intermediate functions
 def compile_LED_to_JS(LED_code_string):
     LED_code = preprocess_codeblocks(LED_code_string)
     lexed_LED = lex(LED_code)
@@ -35,72 +25,49 @@ def compile_LED_to_JS(LED_code_string):
     return compiled_LED_to_js
 
 def compile_LED_file_to_JS(filename):
-    LED_code_string = open_LED_file(filename)
+
+    helper_js_string = open_file_as_string("../js/helpers.js")
+
+    LED_code_string = open_file_as_string(filename)
     LED_code = preprocess_codeblocks(LED_code_string)
     lexed_LED = lex(LED_code)
     preprocessed_defs_LED = preprocess_definitions(lexed_LED)
     tokenized_LED = tokenize(preprocessed_defs_LED)
     pared_LED = parse(tokenized_LED)
     compiled_LED_to_js = comp_func(pared_LED)
+    compiled_LED_with_helpers = compiled_LED_to_js + helper_js_string
 
-    return compiled_LED_to_js
+    return compiled_LED_with_helpers
 
+def LED_to_EASEL_game(filename):
 
-print(compile_LED_file_to_JS("NaughtsAndCrossesTrue"))
+    EASEL_code = open_file_as_string("../js/EaselJS.js")
+    HTML_code = open_file_as_string("HTML_main.html")
 
-
-#print(compile_LED_to_JS("/$ newState := segment(point(1,2),point(3,4),BLACK) $/"))
-#print(compile_LED_to_JS("/$ legalToMoveIn(c) iff ~occupied(c) & ~gameOver $/"))
-
-#print(compile_LED_to_JS("/$ even(n) iff `x $/"))
-
-#print(compile_LED_to_JS("/$ playerToMove := `x if even(|currentState|); `o otherwise $/"))
-
-#print(compile_LED_to_JS('''/$  transition(S) := ~ (moveMade(S) in {{}})
-#                        $/
-#                        '''))
+    if not os.path.exists("LED_Game"):
+        os.makedirs("LED_Game")
+    else:
+        shutil.rmtree('LED_Game')
+        os.makedirs("LED_Game")
 
 
-"""
-print(compile_LED_to_JS('''/$ 
+    compiled_LED_to_js = compile_LED_file_to_JS(filename)
 
-                          displayImages(S) := square0 if S = "0"; 
-                                                 
-                                                square4 if S = "4";
-                                                {} otherwise
-                                                
-                        $/
-                        '''))
-"""
-"""
-print(compile_LED_to_JS('''/$
-cellClicked(c) iff
-  mouseClicked &
-  mouseX > xMin(c) 
-$/'''))
-"""
-    #legalToMoveIn(c) iff ~occupied(c) & ~gameOver
+    JS_file = open("LED_Game/JS_code.js", "w+")
+    for i in compiled_LED_to_js: JS_file.write(i)
+    JS_file.close()
 
-'''
-function displayImages(S){
-  
-  if(S == '0'){
-    return(square0());
-  }
-  else if(S == '1'){
-    return(square1());
-  }
-  else if(S == '2'){
-    return(square2());
-  }
-  else if(S == '3'){
-    return(square3());
-  }
-  else if(S == '4'){
-    return(square4());
-  }
-  return([[]]);
-}
+    EASEL_file = open("LED_Game/Easel_Game_Engine.js", "w+")
+    for i in EASEL_code: EASEL_file.write(i)
+    EASEL_file.close()
+
+    HTML_file = open("LED_Game/HTML_file.html", "w+")
+    for i in HTML_code: HTML_file.write(i)
+    HTML_file.close()
+
+    return ("Created game")
 
 
-'''
+print(LED_to_EASEL_game("NaughtsAndCrossesTrue"))
+
+#print(compile_LED_to_JS("/$ newDef(s) := s + 10 $/"))

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>LED Game</title>
+
+
+</head>
+
+<body>
+
+<audio src="http://freesound.org/data/previews/196/196106_2271450-lq.ogg" id="ding"></audio>
+<audio src="https://freesound.org/data/previews/275/275151_4745081-lq.ogg" id="bang"></audio>
+<audio src="https://freesound.org/data/previews/159/159376_2874984-lq.ogg" id="boing"></audio>
+<audio src="https://freesound.org/data/previews/183/183100_2394245-lq.ogg" id="clap"></audio>
+<audio src="https://freesound.org/data/previews/323/323747_950925-lq.ogg" id="click"></audio>
+
+
+<body onkeyup="keyPress(event)">
+<canvas id="easel" width="1000" height="800" style="border:2px solid black" onclick="storeGuess(event)"></canvas>
+  <button onclick="cleanUp()">Clean Up</button>
+</body>
+<script src='Easel_Game_Engine.js'></script>
+<script src="JS_code.js"></script>
+
+</body>
+
+</html>

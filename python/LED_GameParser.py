@@ -68,45 +68,7 @@ def where(L):
 
         return (False, None)
     return (False, None)
-'''
 
-# rule: ifClasuses -> ifClause | ifClause ; ifClauses
-def parseIfClauses(S):
-    for i in range(len(S)):
-        if S[i]==';':
-            (t1,f1)=parseIfClause(S[0:i])
-            (t2,f2)= parseIfClauses(S[i+1:])
-            if f1 and f2: 
-                if(isinstance(t2.tree,list) and t2.op()=='cond'):
-                    return (AST('cond',[t1]+t2.args()),True) 
-                else:
-                    return (AST('cond',[t1,t2]),True)
-    (tree,flag) = parseIfClause(S)
-    if flag: 
-        return (tree,True)    
-    return (None,False)    
-
-# rule: ifClause -> term if statement
-def parseIfClause(S):
-    for i in range(len(S)):
-        if S[i]=='if':
-            (t1,f1)=parseTerm(S[0:i])
-            # statement and sentence are used interchangely 
-            (t2,f2)= parseSentence(S[i+1:])
-            if f1 and f2: 
-                return (AST('if',[t2,t1]),True) 
-    return (None,False)    
-
-def parseWhereClause(S):
-    #rule: whereClause -> where Stmt
-    
-    if len(S)>1 and S[0]=='where':
-        (t,f)=parseSentence(S[1:])
-        if f:
-            return (t,True)
-    return(None,False)
-
-'''
 
 
 ##Cont ::= Set | Tup | Seq | funcCall
@@ -581,10 +543,8 @@ def Quant(L):
 def B0(L):
     #Boolean
     if isinstance(L[0], bool) and len(L)==1 : return (True, ['Bool',L[0]])
-    print("got here boolean")
     #funcCall
     (flag, tree) = funcCall(L)
-    print("got here string")
     if flag:
         return (True, tree)
     #str                                                                        # TODO : Remove
@@ -593,10 +553,8 @@ def B0(L):
     if L[0] == '(':
         (f1, t1) = B5(L[1:-1])
         if f1 and L[-1] == ')': return (True, t1)
-    print("got here ( ) ")
     #Cond
     (flag, tree) = Cond(L)
-    print("Got here cond")
     if flag: return (True, tree)
     #error
     return (False, None)
@@ -683,42 +641,3 @@ def B5(L):
 
     #error
     return (False, None)
-
-
-#print(ifClauses([-5,'if',0,'>','x',';',5,'if',0,'<','x']))
-#print(parse([['blue', ':=', -5,'if',0,'>','x',';',5,'if',0,'<','x',';',10,'if',0,'=','x']]))
-
-#print(parse([['addFive', '(','a',')',':=','a','+',5],['isTrue','iff','some','x','in','{',1,',',-1,'}','.','x','>',0]]))
-#print(parse([['isIn', '(','a',')','iff','test','(','a',')','V','test2','(','a',')']]))
-#print(parse([['test', ':=',300]]))
-#print(parse(['<',1,'+',3,',','{',2,',',3,'}',',',4,'>']))
-#print(parse(['{',1,',',2,',','(',3,'+',4,')','}','U','{','(',True,'=>',False,')',',',7,'}']))
-#print(parse(['{',1,',','{',2,',',3,'}',',',4,'}']))
-#print(parse([2, '+', 2, '^', '(', 4, '-', 4, '/', 5, ')', '-', '(', 18, '^', 1, '/', 5, ')']))
-
-
-
-# ['cellClicked', ':=', 'clickXInCell', '+', '(', 'clickYInCell', '-', 1, ')', '*', 3, 'if', 'clickXInCell', '>', 0, '&', 'clickXInCell', '<', 4, '&', 'clickYInCell', '>', 0, '&', 'clickYInCell', '<', 4, ';', '"no cell clicked"', 'otherwise']
-#print(T4(['clickXInCell', '+', '(', 'clickYInCell', '-', 1, ')', '*', 3, 'if', 'clickXInCell', '>', 0, ';', '"no cell clicked"', 'otherwise']))
-print(Obj(['~', '(', 'moveMade', '(', 'S', ')', 'in', '{', '{', '}', '}', ')']))
-
-'''
-[
-    ['func', 'blue', 
-     [], 
-     [
-         ['if', 
-          ['Num', -5], 
-          ['GT', 
-           ['Num', 0], 
-           ['funcCall', 'x', 
-            []]]], 
-         ['if', 
-          ['Num', 5], 
-          ['LT', 
-           ['Num', 0], 
-           ['funcCall', 'x', 
-            []]]]]]]
-'''
-
-[['func', 'blue', [], ['ifClauses', ['if', ['Num', -5], ['GT', ['Num', 0], ['funcCall', 'x', []]]], ['ifClauses', ['if', ['Num', 5], ['LT', ['Num', 0], ['funcCall', 'x', []]]], ['if', ['Num', 10], ['EQ', ['Num', 0], ['funcCall', 'x', []]]]]]]]
